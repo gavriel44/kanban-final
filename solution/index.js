@@ -6,19 +6,19 @@ const board = {
     {
       id: 1,
       name: 'To do tasks',
-      tasks: ['clean my room', 'take the dog out'],
+      tasks: ['sdasd'],
       styleClass: 'to-do-tasks',
     },
     {
       id: 2,
       name: 'In progress tasks',
-      tasks: ['test'],
+      tasks: [],
       styleClass: 'in-progress-tasks',
     },
     {
       id: 3,
       name: 'Done tasks',
-      tasks: ['test2', 'test3'],
+      tasks: [],
       styleClass: 'in-progress-tasks',
     },
   ],
