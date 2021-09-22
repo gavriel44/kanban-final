@@ -83,6 +83,7 @@ function renderList(list, fatherDiv) {
   })
   const addButton = createElement('button', ['Add'], ['add-button'], {
     id: `submit-add-${list.styleClass.slice(0, list.styleClass.indexOf('-tasks'))}`,
+    'data-role': 'adding-task',
   })
 
   const tasks = []
@@ -92,10 +93,21 @@ function renderList(list, fatherDiv) {
   }
 
   const tasksList = createElement('ul', tasks, [list.styleClass])
-  const section = createElement('section', [listHeader, tasksList, input, addButton], ['section'])
+  const section = createElement('section', [listHeader, tasksList, input, addButton], ['section'], {
+    'data-original-list-id': list.id,
+  })
 
   fatherDiv.append(section)
 }
+
+// -------------------
+/*
+ *
+ *
+ * board management functions.
+ *
+ *
+ */
 
 function addTask(listId, task) {
   board.addTask(listId, task)
@@ -107,23 +119,53 @@ function addTask(listId, task) {
   renderLists(listsDiv)
 }
 
-function removeAllChildNodes(parent) {
-  while (parent.firstChild) {
-    parent.removeChild(parent.firstChild)
+// -------------------
+
+/*
+ *
+ *
+ * event handling functions.
+ *
+ */
+
+function eventDelegationClickHandler(event) {
+  const target = event.target
+
+  if (target.dataset.role === 'adding-task') {
+    let inputValue = target.parentElement.querySelector('input').value
+    if (inputValue === '') {
+      alert('Cant add an empty task!')
+    } else {
+        let relevantListId = Number(target.parentElement.dataset.originalListId)
+      addTask(relevantListId, inputValue)
+    }
   }
 }
+
+document.addEventListener('click', eventDelegationClickHandler)
+
+// -------------------
+
+/*
+ *
+ *
+ * local storage management functions.
+ *
+ */
 
 function updateLocalStorageBoardLists() {
   localStorage.setItem('myBoardLists', JSON.stringify(board.lists))
 }
 
 function clearLocalStorageBoarLists() {
-    localStorage.removeItem('myBoardLists')
+  localStorage.removeItem('myBoardLists')
 }
 
 function getLocalStorageBoardLists() {
   return JSON.parse(localStorage.getItem('myBoardLists'))
 }
+
+// -------------------
 
 /**
  * Creates a new DOM element.
@@ -146,5 +188,13 @@ function createElement(tagName, children = [], classes = [], attributes = {}) {
   }
   return mainElement
 }
+
+function removeAllChildNodes(parent) {
+  while (parent.firstChild) {
+    parent.removeChild(parent.firstChild)
+  }
+}
+
+// -------------------
 
 onEnteringSite()

@@ -48,9 +48,8 @@ header {
   min-height: 300px;
 }
 
-
 .section {
-    border: solid black;
+  border: solid black;
   font-size: 1.2rem;
   text-align: center;
   color: #9a1750;
