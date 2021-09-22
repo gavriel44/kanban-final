@@ -48,7 +48,7 @@ const boardDiv = document.getElementById('board-div')
 let board
 
 function onEnteringSite() {
-  if (localStorage.getItem('myBoardLists')) {
+  if (!!localStorage.getItem('myBoardLists')) {
     board = new Board(getLocalStorageBoardLists())
   } else {
     board = createBrandNewBoard()
@@ -107,8 +107,6 @@ function addTask(listId, task) {
   renderLists(listsDiv)
 }
 
-function clearLists() {}
-
 function removeAllChildNodes(parent) {
   while (parent.firstChild) {
     parent.removeChild(parent.firstChild)
@@ -117,6 +115,10 @@ function removeAllChildNodes(parent) {
 
 function updateLocalStorageBoardLists() {
   localStorage.setItem('myBoardLists', JSON.stringify(board.lists))
+}
+
+function clearLocalStorageBoarLists() {
+    localStorage.removeItem('myBoardLists')
 }
 
 function getLocalStorageBoardLists() {
