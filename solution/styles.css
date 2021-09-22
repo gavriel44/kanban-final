@@ -32,7 +32,7 @@ header {
   border-radius: 15px;
 }
 
-#board-div {
+.lists-div {
   box-sizing: border-box;
   width: 75%;
   margin: 2em auto;
@@ -44,6 +44,7 @@ header {
   padding: 1.5em;
   min-height: 300px;
 }
+
 
 .section {
   font-size: 1.2rem;

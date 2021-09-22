@@ -21,32 +21,37 @@ class Board {
   }
 }
 
-const board = new Board([
-  {
-    id: 1,
-    name: 'To do tasks',
-    tasks: ['sdasd', 'sdasd'],
-    styleClass: 'to-do-tasks',
-  },
-  {
-    id: 2,
-    name: 'In progress tasks',
-    tasks: [],
-    styleClass: 'in-progress-tasks',
-  },
-  {
-    id: 3,
-    name: 'Done tasks',
-    tasks: [],
-    styleClass: 'in-progress-tasks',
-  },
-])
+function createBrandNewBoard() {
+  return new Board([
+    {
+      id: 1,
+      name: 'To do tasks',
+      tasks: ['sdasd', 'sdasd'],
+      styleClass: 'to-do-tasks',
+    },
+    {
+      id: 2,
+      name: 'In progress tasks',
+      tasks: [],
+      styleClass: 'in-progress-tasks',
+    },
+    {
+      id: 3,
+      name: 'Done tasks',
+      tasks: [],
+      styleClass: 'in-progress-tasks',
+    },
+  ])
+}
 
 const boardDiv = document.getElementById('board-div')
+let board
 
 function onEnteringSite() {
-  if (localStorage.getItem('board')) {
-    board = JSON.parse(localStorage.getItem('board'))
+  if (localStorage.getItem('myBoardLists')) {
+    board = new Board(getLocalStorageBoardLists())
+  } else {
+    board = createBrandNewBoard()
   }
   renderBoard(boardDiv)
 }
@@ -59,6 +64,12 @@ function onEnteringSite() {
  */
 
 function renderBoard(fatherDiv) {
+  const listsDiv = createElement('div', [], ['lists-div'], { id: 'lists-div' })
+  boardDiv.append(listsDiv)
+  renderLists(listsDiv)
+}
+
+function renderLists(fatherDiv) {
   for (let list of board.lists) {
     renderList(list, fatherDiv)
   }
@@ -81,16 +92,36 @@ function renderList(list, fatherDiv) {
   }
 
   const tasksList = createElement('ul', tasks, [list.styleClass])
-
   const section = createElement('section', [listHeader, tasksList, input, addButton], ['section'])
 
   fatherDiv.append(section)
 }
 
-// function addTask(task) {
-//     board.addTask(task);
-//     renderTasks();
-// }
+function addTask(listId, task) {
+  board.addTask(listId, task)
+  updateLocalStorageBoardLists()
+
+  const listsDiv = document.getElementById('lists-div')
+  removeAllChildNodes(listsDiv)
+
+  renderLists(listsDiv)
+}
+
+function clearLists() {}
+
+function removeAllChildNodes(parent) {
+  while (parent.firstChild) {
+    parent.removeChild(parent.firstChild)
+  }
+}
+
+function updateLocalStorageBoardLists() {
+  localStorage.setItem('myBoardLists', JSON.stringify(board.lists))
+}
+
+function getLocalStorageBoardLists() {
+  return JSON.parse(localStorage.getItem('myBoardLists'))
+}
 
 /**
  * Creates a new DOM element.
