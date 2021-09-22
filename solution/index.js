@@ -1,8 +1,11 @@
 'use strict'
 
 class Board {
-  constructor(lists) {
-    this.lists = lists
+  constructor(tasks) {
+    this.lists = []
+    for (let taskArrayName in tasks) {
+      this.creatNewList(taskArrayName, tasks[taskArrayName], taskArrayName + '-tasks')
+    }
   }
 
   addTask(listId, task) {
@@ -10,46 +13,50 @@ class Board {
   }
 
   getList(listId) {
-    return this.getObjectFromArray(listId, this.lists)
+    return getObjectFromArray(listId, this.lists)
   }
 
-  getObjectFromArray(objectId, objectArr) {
-    // throws Error if Object does not exists.
-    const requestedObject = objectArr.find((obj) => obj.id === objectId)
-    if (requestedObject === undefined) throw new Error('so such object exists')
-    return requestedObject
+  creatNewList(name, tasks, styleClass, id = generateNewIdInArrayOfObjects(this.lists)) {
+    checkIfObjectIdTaken(id, this.getList)
+
+    this.lists.push({
+      id,
+      name,
+      tasks,
+      styleClass,
+    })
   }
 }
 
 function createBrandNewBoard() {
-  return new Board([
-    {
-      id: 1,
-      name: 'To do tasks',
-      tasks: ['sdasd', 'sdasd'],
-      styleClass: 'to-do-tasks',
-    },
-    {
-      id: 2,
-      name: 'In progress tasks',
-      tasks: [],
-      styleClass: 'in-progress-tasks',
-    },
-    {
-      id: 3,
-      name: 'Done tasks',
-      tasks: [],
-      styleClass: 'in-progress-tasks',
-    },
-  ])
+  return new Board({ todo: [], 'in-progress': [], done: [] })
+  //     {
+  //       id: 1,
+  //       name: 'To do tasks',
+  //       tasks: ['sdasd', 'sdasd'],
+  //       styleClass: 'to-do-tasks',
+  //     },
+  //     {
+  //       id: 2,
+  //       name: 'In progress tasks',
+  //       tasks: [],
+  //       styleClass: 'in-progress-tasks',
+  //     },
+  //     {
+  //       id: 3,
+  //       name: 'Done tasks',
+  //       tasks: [],
+  //       styleClass: 'done-tasks',
+  //     },
+  //   ])
 }
 
 const boardDiv = document.getElementById('board-div')
 let board
 
 function onEnteringSite() {
-  if (!!localStorage.getItem('myBoardLists')) {
-    board = new Board(getLocalStorageBoardLists())
+  if (!!localStorage.getItem('tasks')) {
+    board = new Board(getLocalStorageBoardTasks())
   } else {
     board = createBrandNewBoard()
   }
@@ -76,7 +83,7 @@ function renderLists(fatherDiv) {
 }
 
 function renderList(list, fatherDiv) {
-  const listHeader = createElement('h2', [list.name], ['list-header'])
+  const listHeader = createElement('h2', [formatName(list.name)], ['list-header'])
   const input = createElement('input', [], ['add-input'], {
     id: `add-${list.styleClass.slice(0, -1)}`,
     placeholder: 'new task',
@@ -100,6 +107,13 @@ function renderList(list, fatherDiv) {
   fatherDiv.append(section)
 }
 
+function formatName(listName) {
+  return listName
+    .split('-')
+    .map((word) => word[0].toUpperCase() + word.slice(1))
+    .join(' ')
+}
+
 // -------------------
 /*
  *
@@ -111,7 +125,7 @@ function renderList(list, fatherDiv) {
 
 function addTask(listId, task) {
   board.addTask(listId, task)
-  updateLocalStorageBoardLists()
+  updateLocalStorageTasks()
 
   const listsDiv = document.getElementById('lists-div')
   removeAllChildNodes(listsDiv)
@@ -136,7 +150,7 @@ function eventDelegationClickHandler(event) {
     if (inputValue === '') {
       alert('Cant add an empty task!')
     } else {
-        let relevantListId = Number(target.parentElement.dataset.originalListId)
+      let relevantListId = Number(target.parentElement.dataset.originalListId)
       addTask(relevantListId, inputValue)
     }
   }
@@ -153,16 +167,21 @@ document.addEventListener('click', eventDelegationClickHandler)
  *
  */
 
-function updateLocalStorageBoardLists() {
-  localStorage.setItem('myBoardLists', JSON.stringify(board.lists))
+function updateLocalStorageTasks() {
+  const tasks = {}
+  for (let list of board.lists) {
+    tasks[list.name] = list.tasks
+  }
+
+  localStorage.setItem('tasks', JSON.stringify(tasks))
 }
 
 function clearLocalStorageBoarLists() {
-  localStorage.removeItem('myBoardLists')
+  localStorage.removeItem('tasks')
 }
 
-function getLocalStorageBoardLists() {
-  return JSON.parse(localStorage.getItem('myBoardLists'))
+function getLocalStorageBoardTasks() {
+  return JSON.parse(localStorage.getItem('tasks'))
 }
 
 // -------------------
@@ -192,6 +211,40 @@ function createElement(tagName, children = [], classes = [], attributes = {}) {
 function removeAllChildNodes(parent) {
   while (parent.firstChild) {
     parent.removeChild(parent.firstChild)
+  }
+}
+
+function generateNewIdInArrayOfObjects(objectArr) {
+  /* Gets the largest id and returns it + 1. 
+    i.e the returning id does not exists in the
+    array and is unique.
+    */
+
+  if (objectArr.length === 0) return 1
+  const idArray = objectArr.map((obj) => obj.id)
+  return Math.max(...idArray) + 1
+}
+
+function getObjectFromArray(objectId, objectArr) {
+  // throws Error if Object does not exists.
+  const requestedObject = objectArr.find((obj) => obj.id === objectId)
+  if (requestedObject === undefined) throw new Error('so such object exists')
+  return requestedObject
+}
+
+function checkIfObjectIdTaken(id, getFunction) {
+  // getFunction is a function expression. we will know where to search depending on the function
+  try {
+    getFunction(id) // remember: getFunction can be: [getSong or getPlaylist] and throws Error if no song was found.
+    throw new Error('id already exist')
+  } catch (error) {
+    /* 
+      Only if the error is because of "finding" the song
+      then we continue and throw an Error.
+      */
+    if (error.message === 'id already exist') {
+      throw new Error('id already exist')
+    }
   }
 }
 
