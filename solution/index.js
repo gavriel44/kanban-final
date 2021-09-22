@@ -1,46 +1,62 @@
 'use strict'
 
-const board = {
-  lists: [
-    // these are basically the lists on the board
-    {
-      id: 1,
-      name: 'To do tasks',
-      tasks: ['sdasd'],
-      styleClass: 'to-do-tasks',
-    },
-    {
-      id: 2,
-      name: 'In progress tasks',
-      tasks: [],
-      styleClass: 'in-progress-tasks',
-    },
-    {
-      id: 3,
-      name: 'Done tasks',
-      tasks: [],
-      styleClass: 'in-progress-tasks',
-    },
-  ],
+class Board {
+  constructor(lists) {
+    this.lists = lists
+  }
 
-//   addTask(id, )
+  addTask(listId, task) {
+    this.getList(listId).tasks.push(task)
+  }
+
+  getList(listId) {
+    return this.getObjectFromArray(listId, this.lists)
+  }
+
+  getObjectFromArray(objectId, objectArr) {
+    // throws Error if Object does not exists.
+    const requestedObject = objectArr.find((obj) => obj.id === objectId)
+    if (requestedObject === undefined) throw new Error('so such object exists')
+    return requestedObject
+  }
 }
+
+const board = new Board([
+  {
+    id: 1,
+    name: 'To do tasks',
+    tasks: ['sdasd', 'sdasd'],
+    styleClass: 'to-do-tasks',
+  },
+  {
+    id: 2,
+    name: 'In progress tasks',
+    tasks: [],
+    styleClass: 'in-progress-tasks',
+  },
+  {
+    id: 3,
+    name: 'Done tasks',
+    tasks: [],
+    styleClass: 'in-progress-tasks',
+  },
+])
 
 const boardDiv = document.getElementById('board-div')
 
 function onEnteringSite() {
-    if (localStorage.getItem('board')) {
-        board = JSON.parse(localStorage.getItem('board'))
-    }
-    renderBoard(boardDiv);
+  if (localStorage.getItem('board')) {
+    board = JSON.parse(localStorage.getItem('board'))
+  }
+  renderBoard(boardDiv)
 }
 
-/* 
-*
-* The main rendering functions
-*
-*
-*/
+/*
+ *
+ * The main rendering functions
+ *
+ *
+ */
 
 function renderBoard(fatherDiv) {
   for (let list of board.lists) {
@@ -50,7 +66,10 @@ function renderBoard(fatherDiv) {
 
 function renderList(list, fatherDiv) {
   const listHeader = createElement('h2', [list.name], ['list-header'])
-  const input = createElement('input', [], ['add-input'], { id: `add-${list.styleClass.slice(0, -1)}` , placeholder: 'new task'})
+  const input = createElement('input', [], ['add-input'], {
+    id: `add-${list.styleClass.slice(0, -1)}`,
+    placeholder: 'new task',
+  })
   const addButton = createElement('button', ['Add'], ['add-button'], {
     id: `submit-add-${list.styleClass.slice(0, list.styleClass.indexOf('-tasks'))}`,
   })
