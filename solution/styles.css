@@ -9,10 +9,9 @@ body {
   background-color: #ee4c7c;
   font-size: 1.5em;
   margin: auto;
-  
+
   height: 100%;
   color: #fff;
-  
 }
 
 h1 {
@@ -20,7 +19,7 @@ h1 {
 }
 
 header {
-    padding: 0 12.5% 0 12.5%;
+  padding: 0 12.5% 0 12.5%;
   display: flex;
   justify-content: space-between;
   background-color: #9a1750;
@@ -34,27 +33,62 @@ header {
 }
 
 #board-div {
-    box-sizing: border-box;
-    width: 75%;
-    margin: 2em auto;
-    border-radius: 15px;
-    background-color: #e3e2df;
-    display: flex;
-    justify-content: space-between;
-    flex-flow: row wrap;
-    padding: 1.5em;
-    min-height: 300px;
-    
+  box-sizing: border-box;
+  width: 75%;
+  margin: 2em auto;
+  border-radius: 15px;
+  background-color: #e3e2df;
+  display: flex;
+  justify-content: space-between;
+  flex-flow: row wrap;
+  padding: 1.5em;
+  min-height: 300px;
 }
 
 .section {
-    font-size: 1.2rem;
-    text-align: center;
-    color: #9a1750;
-    width: 31%;
-    background-color: #e3afbc;
-    border-radius: 15px;
-    text-shadow: none;
+  font-size: 1.2rem;
+  text-align: center;
+  color: #9a1750;
+  width: 31%;
+  background-color: #e3afbc;
+  border-radius: 15px;
+  text-shadow: none;
 }
 
+.add-input {
+}
 
+.add-button {
+  width: 80px;
+  font-size: 1em;
+  font-weight: 600;
+  color: #fff;
+  cursor: pointer;
+  margin: 20px;
+  height: 35px;
+  text-align: center;
+  border: none;
+  background-size: 300% 100%;
+  border-radius: 50px;
+  moz-transition: all 0.4s ease-in-out;
+  -o-transition: all 0.4s ease-in-out;
+  -webkit-transition: all 0.4s ease-in-out;
+  transition: all 0.4s ease-in-out;
+}
+
+.add-button:hover {
+  background-position: 100% 0;
+  moz-transition: all 0.4s ease-in-out;
+  -o-transition: all 0.4s ease-in-out;
+  -webkit-transition: all 0.4s ease-in-out;
+  transition: all 0.4s ease-in-out;
+}
+
+.add-button:focus {
+  outline: none;
+}
+
+.add-button {
+  background-image: linear-gradient(to right, #29323c, #485563, #2b5876, #4e4376);
+  box-shadow: 0 4px 15px 0 rgba(45, 54, 65, 0.75);
+}

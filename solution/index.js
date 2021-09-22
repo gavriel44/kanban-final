@@ -22,6 +22,8 @@ const board = {
       styleClass: 'in-progress-tasks',
     },
   ],
+
+//   addTask(id, )
 }
 
 const boardDiv = document.getElementById('board-div')
@@ -33,6 +35,13 @@ function onEnteringSite() {
     renderBoard(boardDiv);
 }
 
+/* 
+*
+* The main rendering functions
+*
+*
+*/
+
 function renderBoard(fatherDiv) {
   for (let list of board.lists) {
     renderList(list, fatherDiv)
@@ -41,8 +50,8 @@ function renderBoard(fatherDiv) {
 
 function renderList(list, fatherDiv) {
   const listHeader = createElement('h2', [list.name], ['list-header'])
-  const input = createElement('input', [], [], { id: `add-${list.styleClass.slice(0, -1)}` })
-  const addButton = createElement('button', ['Add'], [], {
+  const input = createElement('input', [], ['add-input'], { id: `add-${list.styleClass.slice(0, -1)}` , placeholder: 'new task'})
+  const addButton = createElement('button', ['Add'], ['add-button'], {
     id: `submit-add-${list.styleClass.slice(0, list.styleClass.indexOf('-tasks'))}`,
   })
 
@@ -58,6 +67,11 @@ function renderList(list, fatherDiv) {
 
   fatherDiv.append(section)
 }
+
+// function addTask(task) {
+//     board.addTask(task);
+//     renderTasks();
+// }
 
 /**
  * Creates a new DOM element.
