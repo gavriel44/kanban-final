@@ -15,12 +15,10 @@ class Board {
       if (this.baseTasksLists.includes(newTaskListName)) {
         const alreadyExistsList = this.getListByName(newTaskListName)
         tasks[newTaskListName].forEach((taskText) => this.addTask(alreadyExistsList.id, taskText))
-        
       } else {
         this.addNewList(newTaskListName, [], formatListClassName(newTaskListName))
         const newExistingList = this.getListByName(newTaskListName)
         tasks[newTaskListName].forEach((taskText) => this.addTask(newExistingList.id, taskText))
-
       }
     }
   }
@@ -107,7 +105,9 @@ function renderList(list, fatherDiv) {
   const tasks = []
 
   for (let task of list.tasks) {
-    tasks.push(createElement('li', [task.text], ['task'], { 'data-original-task-id': task.id,  contenteditable: 'true' }))
+    tasks.push(
+      createElement('li', [task.text], ['task'], { 'data-original-task-id': task.id, contenteditable: 'true' })
+    )
   }
 
   const tasksList = createElement('ul', tasks, [list.styleClass, 'task-list'])
@@ -147,7 +147,7 @@ function addTask(listId, task) {
   renderLists(listsDiv)
 }
 
-function addNewList(listName, tasks=[]) {
+function addNewList(listName, tasks = []) {
   board.addNewList(listName, tasks, formatListClassName(listName))
   updateLocalStorageTasks()
   renderLists(listsDiv)
@@ -163,6 +163,18 @@ function moveTask(listId, taskId, newListId, newIndex = 0) {
 
   updateLocalStorageTasks()
   renderLists(listsDiv)
+}
+
+function filterLists() {
+  const allLiElements = document.querySelectorAll('.section li')
+
+  const valueInput = document.querySelector('#search').value.toLowerCase().trim()
+
+  for (let liElement of allLiElements) {
+    const liValue = liElement.innerText.toLowerCase().trim()
+
+    liElement.style.display = liValue.search(new RegExp(valueInput.replace(/\s+/, '|'))) != -1 ? '' : 'none'
+  }
 }
 
 // -------------------
@@ -203,7 +215,7 @@ function numberKeyDownEventHandler(event) {
   const keyPressed = event.key
   const listsIdsArray = getIdsArrayFromObjArray(board.lists).map((id) => String(id))
   if (liMouseIsIn && listsIdsArray.includes(keyPressed)) {
-    console.log(liMouseIsIn);
+    console.log(liMouseIsIn)
     const listId = getAncestorSectionListId(liMouseIsIn)
     const taskId = getLiTaskId(liMouseIsIn)
     const newListId = Number(keyPressed)
@@ -243,10 +255,9 @@ function focusOutEventHandler(event) {
 
   const task = getTaskFromLi(target)
 
-  task.text = target.innerHTML
+  task.text = target.innerText
 
   updateLocalStorageTasks()
-
 }
 
 function getAncestorSectionListId(liElement) {
@@ -291,14 +302,13 @@ function updateLocalStorageTasks() {
   const tasks = {}
   for (let list of board.lists) {
     if (list.name === 'to-do') {
-      tasks['todo'] = list.tasks.map(task => task.text)
+      tasks['todo'] = list.tasks.map((task) => task.text)
     } else {
-      tasks[list.name] = list.tasks.map(task => task.text)
-
+      tasks[list.name] = list.tasks.map((task) => task.text)
     }
   }
   function formatTasks(tasks) {
-    return tasks.map(task => {})
+    return tasks.map((task) => {})
   }
 
   localStorage.setItem('tasks', JSON.stringify(tasks))
