@@ -53,7 +53,7 @@ class Board {
 }
 
 const boardDiv = document.getElementById('board-div')
-const listsDiv = createElement('div', [], ['lists-div'], { id: 'lists-div' })
+const listsDiv = document.getElementById('lists-div')
 const baseTasksLists = ['to-do', 'in-progress', 'done']
 let board
 
@@ -71,6 +71,7 @@ function onEnteringSite() {
   renderBoard(boardDiv)
 }
 
+// -------------------
 /*
  *
  * The main rendering functions
@@ -79,7 +80,6 @@ function onEnteringSite() {
  */
 
 function renderBoard(fatherDiv) {
-  boardDiv.append(listsDiv)
   renderLists(listsDiv)
 }
 
@@ -106,7 +106,7 @@ function renderList(list, fatherDiv) {
 
   for (let task of list.tasks) {
     tasks.push(
-      createElement('li', [task.text], ['task'], { 'data-original-task-id': task.id, contenteditable: 'true' })
+      createElement('li', [task.text], ['task'], { 'data-original-task-id': task.id})
     )
   }
 
@@ -186,7 +186,7 @@ function filterLists() {
  *
  */
 
-function eventDelegationClickHandler(event) {
+function clickEventHandler(event) {
   const target = event.target
 
   if (target.dataset.role === 'adding-task') {
@@ -253,11 +253,22 @@ function focusOutEventHandler(event) {
 
   if (target.tagName !== 'LI') return
 
+  target.setAttribute('contenteditable', 'false')
+
   const task = getTaskFromLi(target)
 
   task.text = target.innerText
 
   updateLocalStorageTasks()
+}
+
+function dblClickEventHandler(event) {
+  const target = event.target
+
+  if (target.tagName !== 'LI') return
+
+  target.setAttribute('contenteditable', 'true')
+  target.focus()
 }
 
 function getAncestorSectionListId(liElement) {
@@ -279,7 +290,9 @@ document.addEventListener('keydown', altKeyDownEventHandler)
 document.addEventListener('mouseover', mouseOverEventHandler)
 document.addEventListener('mouseout', mouseOutEventHandler)
 
-document.addEventListener('click', eventDelegationClickHandler)
+document.addEventListener('click', clickEventHandler)
+
+document.addEventListener('dblclick', dblClickEventHandler)
 
 document.addEventListener('focusout', focusOutEventHandler)
 
