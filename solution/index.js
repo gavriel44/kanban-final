@@ -107,7 +107,7 @@ function renderList(list, fatherDiv) {
   const tasks = []
 
   for (let task of list.tasks) {
-    tasks.push(createElement('li', [task.text], ['task'], { 'data-original-task-id': task.id }))
+    tasks.push(createElement('li', [task.text], ['task'], { 'data-original-task-id': task.id,  contenteditable: 'true' }))
   }
 
   const tasksList = createElement('ul', tasks, [list.styleClass, 'task-list'])
@@ -147,7 +147,7 @@ function addTask(listId, task) {
   renderLists(listsDiv)
 }
 
-function addNewList(listName, tasks) {
+function addNewList(listName, tasks=[]) {
   board.addNewList(listName, tasks, formatListClassName(listName))
   updateLocalStorageTasks()
   renderLists(listsDiv)
@@ -203,11 +203,13 @@ function numberKeyDownEventHandler(event) {
   const keyPressed = event.key
   const listsIdsArray = getIdsArrayFromObjArray(board.lists).map((id) => String(id))
   if (liMouseIsIn && listsIdsArray.includes(keyPressed)) {
-    const listId = Number(liMouseIsIn.closest('section').dataset.originalListId)
-    const taskId = Number(liMouseIsIn.dataset.originalTaskId)
+    console.log(liMouseIsIn);
+    const listId = getAncestorSectionListId(liMouseIsIn)
+    const taskId = getLiTaskId(liMouseIsIn)
     const newListId = Number(keyPressed)
 
     moveTask(listId, taskId, newListId)
+    liMouseIsIn = null // the task has moved so the mouse is no longer inside it.
   }
 }
 
@@ -218,10 +220,6 @@ function altKeyUpEventHandler(event) {
     document.removeEventListener('keyup', altKeyUpEventHandler)
   }
 }
-
-document.addEventListener('keydown', altKeyDownEventHandler)
-document.addEventListener('mouseover', mouseOverEventHandler)
-document.addEventListener('mouseout', mouseOutEventHandler)
 
 function mouseOverEventHandler(event) {
   const target = event.target
@@ -238,7 +236,41 @@ function mouseOutEventHandler(event) {
   liMouseIsIn = null
 }
 
+function focusOutEventHandler(event) {
+  const target = event.target
+
+  if (target.tagName !== 'LI') return
+
+  const task = getTaskFromLi(target)
+
+  task.text = target.innerHTML
+
+  updateLocalStorageTasks()
+
+}
+
+function getAncestorSectionListId(liElement) {
+  return Number(liElement.closest('section').dataset.originalListId)
+}
+
+function getLiTaskId(liElement) {
+  return Number(liElement.dataset.originalTaskId)
+}
+
+function getTaskFromLi(liElement) {
+  const relevantListId = getAncestorSectionListId(liElement)
+  const taskId = getLiTaskId(liElement)
+
+  return board.getTask(relevantListId, taskId)
+}
+
+document.addEventListener('keydown', altKeyDownEventHandler)
+document.addEventListener('mouseover', mouseOverEventHandler)
+document.addEventListener('mouseout', mouseOutEventHandler)
+
 document.addEventListener('click', eventDelegationClickHandler)
+
+document.addEventListener('focusout', focusOutEventHandler)
 
 // -------------------
 
@@ -265,8 +297,8 @@ function updateLocalStorageTasks() {
 
     }
   }
-  function parseTasks(tasks) {
-
+  function formatTasks(tasks) {
+    return tasks.map(task => {})
   }
 
   localStorage.setItem('tasks', JSON.stringify(tasks))
