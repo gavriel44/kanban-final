@@ -13,19 +13,29 @@ class Board {
 
     for (let newTaskListName in tasks) {
       if (this.baseTasksLists.includes(newTaskListName)) {
-        this.getListByName(newTaskListName).tasks = tasks[newTaskListName]
+        const alreadyExistsList = this.getListByName(newTaskListName)
+        tasks[newTaskListName].forEach((taskText) => this.addTask(alreadyExistsList.id, taskText))
+        
       } else {
-        this.addNewList(newTaskListName, tasks[newTaskListName], formatListClassName(newTaskListName))
+        this.addNewList(newTaskListName, [], formatListClassName(newTaskListName))
+        const newExistingList = this.getListByName(newTaskListName)
+        tasks[newTaskListName].forEach((taskText) => this.addTask(newExistingList.id, taskText))
+
       }
     }
   }
 
-  addTask(listId, task) {
-    this.getList(listId).tasks.push(task)
+  addTask(listId, taskText) {
+    const listTasks = this.getList(listId).tasks
+    listTasks.push({ text: taskText, id: generateNewIdInArrayOfObjects(listTasks) })
   }
 
   getList(listId) {
     return getObjectFromArray(listId, this.lists)
+  }
+
+  getTask(listId, taskId) {
+    return getObjectFromArray(taskId, this.getList(listId).tasks)
   }
 
   getListByName(listName) {
@@ -46,7 +56,7 @@ class Board {
 
 const boardDiv = document.getElementById('board-div')
 const listsDiv = createElement('div', [], ['lists-div'], { id: 'lists-div' })
-const baseTasksLists = ['todo', 'in-progress', 'done']
+const baseTasksLists = ['to-do', 'in-progress', 'done']
 let board
 
 function createBrandNewBoard() {
@@ -71,7 +81,6 @@ function onEnteringSite() {
  */
 
 function renderBoard(fatherDiv) {
-  
   boardDiv.append(listsDiv)
   renderLists(listsDiv)
 }
@@ -98,7 +107,7 @@ function renderList(list, fatherDiv) {
   const tasks = []
 
   for (let task of list.tasks) {
-    tasks.push(createElement('li', [task], ['task']))
+    tasks.push(createElement('li', [task.text], ['task'], { 'data-original-task-id': task.id }))
   }
 
   const tasksList = createElement('ul', tasks, [list.styleClass, 'task-list'])
@@ -144,6 +153,18 @@ function addNewList(listName, tasks) {
   renderLists(listsDiv)
 }
 
+function moveTask(listId, taskId, newListId, newIndex = 0) {
+  const task = board.getTask(listId, taskId)
+  const oldList = board.getList(listId)
+  const newList = board.getList(newListId)
+
+  oldList.tasks.splice(oldList.tasks.indexOf(task), 1)
+  newList.tasks.splice(newIndex, 0, task)
+
+  updateLocalStorageTasks()
+  renderLists(listsDiv)
+}
+
 // -------------------
 
 /*
@@ -167,6 +188,56 @@ function eventDelegationClickHandler(event) {
   }
 }
 
+let liMouseIsIn = null
+
+function altKeyDownEventHandler(event) {
+  const keyPressed = event.key
+
+  if (liMouseIsIn && keyPressed === 'Alt') {
+    document.addEventListener('keydown', numberKeyDownEventHandler)
+    document.addEventListener('keyup', altKeyUpEventHandler)
+  }
+}
+
+function numberKeyDownEventHandler(event) {
+  const keyPressed = event.key
+  const listsIdsArray = getIdsArrayFromObjArray(board.lists).map((id) => String(id))
+  if (liMouseIsIn && listsIdsArray.includes(keyPressed)) {
+    const listId = Number(liMouseIsIn.closest('section').dataset.originalListId)
+    const taskId = Number(liMouseIsIn.dataset.originalTaskId)
+    const newListId = Number(keyPressed)
+
+    moveTask(listId, taskId, newListId)
+  }
+}
+
+function altKeyUpEventHandler(event) {
+  const keyLifted = event.key
+  if (keyLifted === 'Alt') {
+    document.removeEventListener('keydown', numberKeyDownEventHandler)
+    document.removeEventListener('keyup', altKeyUpEventHandler)
+  }
+}
+
+document.addEventListener('keydown', altKeyDownEventHandler)
+document.addEventListener('mouseover', mouseOverEventHandler)
+document.addEventListener('mouseout', mouseOutEventHandler)
+
+function mouseOverEventHandler(event) {
+  const target = event.target
+
+  if (target.tagName !== 'LI') return
+  liMouseIsIn = target
+}
+
+function mouseOutEventHandler(event) {
+  const target = event.target
+
+  if (target.tagName !== 'LI') return
+
+  liMouseIsIn = null
+}
+
 document.addEventListener('click', eventDelegationClickHandler)
 
 // -------------------
@@ -175,18 +246,27 @@ document.addEventListener('click', eventDelegationClickHandler)
  *
  *
  * local storage management functions.
- *
+ * this is an api for working with the local storage format.
+ * the format:
+ * {
+ *    'todo' : [],
+ *    'in-progress: [],
+ *    'done': [],
+ * }
  */
 
 function updateLocalStorageTasks() {
   const tasks = {}
   for (let list of board.lists) {
-    tasks[list.name] = list.tasks
+    if (list.name === 'to-do') {
+      tasks['todo'] = list.tasks.map(task => task.text)
+    } else {
+      tasks[list.name] = list.tasks.map(task => task.text)
+
+    }
   }
-  if (tasks['to-do']) {
-    const todoValue = deepCopyObj(tasks['to-do'])
-    delete tasks['to-do']
-    tasks.todo = todoValue
+  function parseTasks(tasks) {
+
   }
 
   localStorage.setItem('tasks', JSON.stringify(tasks))
@@ -197,7 +277,12 @@ function clearLocalStorageBoarLists() {
 }
 
 function getLocalStorageBoardTasks() {
-  return JSON.parse(localStorage.getItem('tasks'))
+  let localStorageTasks = JSON.parse(localStorage.getItem('tasks'))
+
+  // we replace the property key: 'todo' with the key 'to-do',
+  // so our Board class can handle it properly.
+  delete Object.assign(localStorageTasks, { ['to-do']: localStorageTasks['todo'] })['todo']
+  return localStorageTasks
 }
 
 // -------------------
@@ -237,7 +322,7 @@ function generateNewIdInArrayOfObjects(objectArr) {
     */
 
   if (objectArr.length === 0) return 1
-  const idArray = objectArr.map((obj) => obj.id)
+  const idArray = getIdsArrayFromObjArray(objectArr)
   return Math.max(...idArray) + 1
 }
 
@@ -246,6 +331,10 @@ function getObjectFromArray(objectId, objectArr) {
   const requestedObject = objectArr.find((obj) => obj.id === objectId)
   if (requestedObject === undefined) throw new Error('so such object exists')
   return requestedObject
+}
+
+function getIdsArrayFromObjArray(objectArr) {
+  return objectArr.map((obj) => obj.id)
 }
 
 function checkIfObjectIdTaken(id, getFunction) {
