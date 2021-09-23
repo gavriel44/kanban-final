@@ -14,7 +14,18 @@
     </header>
     <div id="board-div">
       <!-- here we enter all the dynamic content of the board object e.g the sections.. -->
-      <div class="lists-div" id="lists-div"><p>j</p></div>
+      <div class="lists-div" id="lists-div"><p></p></div>
+
+      <div id="action-div" class="lists-div"> 
+        <div id="api-actions">
+          <button id="save-to-local" class="action-button"><span class="action-span">Save</span></button>
+          <button id="load-from-local" class="action-button"><span class="action-span">Load</span></button>
+        </div>
+        <div id="add-list-div">
+          <input type="text" id="add-new-list" class="add-input" placeholder="List name">
+          <button class="add-list" data-role="adding-list">Add new list</button>
+        </div>
+      </div>
     </div>
 
     <script src="./index.js"></script>
