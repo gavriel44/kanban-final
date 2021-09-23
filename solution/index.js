@@ -1,10 +1,22 @@
 'use strict'
 
 class Board {
-  constructor(tasks) {
+  constructor(baseTasksLists, tasks = {}) {
+    // the first thing we do is to add the base lists so they always be in the same order when we render them
+    // the problem is this: when we save the board in the localStorage we
+    // cant keep the order so we force the order off the first base lists
+    this.baseTasksLists = baseTasksLists
     this.lists = []
-    for (let taskArrayName in tasks) {
-      this.creatNewList(taskArrayName, tasks[taskArrayName], taskArrayName + '-tasks')
+    for (let listName of this.baseTasksLists) {
+      this.addNewList(listName, [], formatListClassName(listName))
+    }
+
+    for (let newTaskListName in tasks) {
+      if (this.baseTasksLists.includes(newTaskListName)) {
+        this.getListByName(newTaskListName).tasks = tasks[newTaskListName]
+      } else {
+        this.addNewList(newTaskListName, tasks[newTaskListName], formatListClassName(newTaskListName))
+      }
     }
   }
 
@@ -16,7 +28,11 @@ class Board {
     return getObjectFromArray(listId, this.lists)
   }
 
-  creatNewList(name, tasks, styleClass, id = generateNewIdInArrayOfObjects(this.lists)) {
+  getListByName(listName) {
+    return this.lists.find((list) => list.name === listName)
+  }
+
+  addNewList(name, tasks, styleClass, id = generateNewIdInArrayOfObjects(this.lists)) {
     checkIfObjectIdTaken(id, this.getList)
 
     this.lists.push({
@@ -28,37 +44,21 @@ class Board {
   }
 }
 
-function createBrandNewBoard() {
-  return new Board({ todo: [], 'in-progress': [], done: [] })
-  //     {
-  //       id: 1,
-  //       name: 'To do tasks',
-  //       tasks: ['sdasd', 'sdasd'],
-  //       styleClass: 'to-do-tasks',
-  //     },
-  //     {
-  //       id: 2,
-  //       name: 'In progress tasks',
-  //       tasks: [],
-  //       styleClass: 'in-progress-tasks',
-  //     },
-  //     {
-  //       id: 3,
-  //       name: 'Done tasks',
-  //       tasks: [],
-  //       styleClass: 'done-tasks',
-  //     },
-  //   ])
-}
-
 const boardDiv = document.getElementById('board-div')
+const listsDiv = createElement('div', [], ['lists-div'], { id: 'lists-div' })
+const baseTasksLists = ['todo', 'in-progress', 'done']
 let board
+
+function createBrandNewBoard() {
+  return new Board(baseTasksLists)
+}
 
 function onEnteringSite() {
   if (!!localStorage.getItem('tasks')) {
-    board = new Board(getLocalStorageBoardTasks())
+    board = new Board(baseTasksLists, getLocalStorageBoardTasks())
   } else {
     board = createBrandNewBoard()
+    updateLocalStorageTasks()
   }
   renderBoard(boardDiv)
 }
@@ -71,12 +71,14 @@ function onEnteringSite() {
  */
 
 function renderBoard(fatherDiv) {
-  const listsDiv = createElement('div', [], ['lists-div'], { id: 'lists-div' })
+  
   boardDiv.append(listsDiv)
   renderLists(listsDiv)
 }
 
 function renderLists(fatherDiv) {
+  removeAllChildNodes(listsDiv)
+
   for (let list of board.lists) {
     renderList(list, fatherDiv)
   }
@@ -114,6 +116,10 @@ function formatName(listName) {
     .join(' ')
 }
 
+function formatListClassName(listName) {
+  return listName + '-tasks'
+}
+
 // -------------------
 /*
  *
@@ -128,8 +134,13 @@ function addTask(listId, task) {
   updateLocalStorageTasks()
 
   const listsDiv = document.getElementById('lists-div')
-  removeAllChildNodes(listsDiv)
 
+  renderLists(listsDiv)
+}
+
+function addNewList(listName, tasks) {
+  board.addNewList(listName, tasks, formatListClassName(listName))
+  updateLocalStorageTasks()
   renderLists(listsDiv)
 }
 
@@ -171,6 +182,11 @@ function updateLocalStorageTasks() {
   const tasks = {}
   for (let list of board.lists) {
     tasks[list.name] = list.tasks
+  }
+  if (tasks['to-do']) {
+    const todoValue = deepCopyObj(tasks['to-do'])
+    delete tasks['to-do']
+    tasks.todo = todoValue
   }
 
   localStorage.setItem('tasks', JSON.stringify(tasks))
@@ -235,17 +251,21 @@ function getObjectFromArray(objectId, objectArr) {
 function checkIfObjectIdTaken(id, getFunction) {
   // getFunction is a function expression. we will know where to search depending on the function
   try {
-    getFunction(id) // remember: getFunction can be: [getSong or getPlaylist] and throws Error if no song was found.
+    getFunction(id) // remember: getFunction can be: [getList] and throws Error if no list was found.
     throw new Error('id already exist')
   } catch (error) {
     /* 
-      Only if the error is because of "finding" the song
+      Only if the error is because of "finding" the object
       then we continue and throw an Error.
       */
     if (error.message === 'id already exist') {
       throw new Error('id already exist')
     }
   }
+}
+
+function deepCopyObj(obj) {
+  return JSON.parse(JSON.stringify(obj))
 }
 
 // -------------------
