@@ -101,7 +101,7 @@ function renderList(list, fatherDiv) {
     tasks.push(createElement('li', [task], ['task']))
   }
 
-  const tasksList = createElement('ul', tasks, [list.styleClass])
+  const tasksList = createElement('ul', tasks, [list.styleClass, 'task-list'])
   const section = createElement('section', [listHeader, tasksList, input, addButton], ['section'], {
     'data-original-list-id': list.id,
   })

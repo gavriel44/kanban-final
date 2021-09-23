@@ -48,6 +48,10 @@ header {
   min-height: 300px;
 }
 
+#board-div {
+  padding: 0 0 1.5rem 0;
+}
+
 .section {
   border: solid black;
   font-size: 1.2rem;
@@ -61,6 +65,17 @@ header {
 }
 
 .add-input {
+
+  width: 60%;
+  padding: 5px 10px;
+  margin: 8px 0;
+  box-sizing: border-box;
+  border-radius: 5px;
+  transition: border 0.3s;
+}
+
+.add-input:focus {
+  border: 3px solid #555;
 }
 
 .add-button {
@@ -96,4 +111,46 @@ header {
 .add-button {
   background-image: linear-gradient(to right, #29323c, #485563, #2b5876, #4e4376);
   box-shadow: 0 4px 15px 0 rgba(45, 54, 65, 0.75);
+}
+
+.task-list {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+}
+
+/* li {
+  background-color: #fff;
+  border: solid black;
+  border-radius: 5px;
+  width: 60%;
+  margin: 5px;
+  text-align: left;
+
+} */
+
+.task {
+  font: 200 20px/1.5;
+  height: 1.5em;
+  line-height: 1.5em;
+  border-radius: 10px;
+  text-decoration: none;
+  font-weight: 600;
+  color: #000;
+  background-color: #ee4c7c;
+
+  margin: 5px auto;
+
+  -webkit-transition: font-size 0.3s ease, background-color 0.3s ease;
+  -moz-transition: font-size 0.3s ease, background-color 0.3s ease;
+  -o-transition: font-size 0.3s ease, background-color 0.3s ease;
+  -ms-transition: font-size 0.3s ease, background-color 0.3s ease;
+  transition: font-size 0.3s ease, background-color 0.3s ease;
+  display: block;
+  width: 80%;
+}
+
+.task:hover {
+  font-size: 30px;
+  background: #f6f6f6;
 }
