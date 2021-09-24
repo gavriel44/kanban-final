@@ -61,6 +61,8 @@ class Board {
   }
 }
 
+const MIN_LOADING_TIME = 2000
+
 const boardDiv = document.getElementById('board-div')
 const listsDiv = document.getElementById('lists-div')
 const baseTasksLists = ['to-do', 'in-progress', 'done']
@@ -71,10 +73,7 @@ function createBrandNewBoard() {
 }
 
 function onEnteringSite() {
-  if (!!localStorage.getItem('tasks')) {
-    board = new Board(baseTasksLists, getLocalStorageBoardTasks())
-  } else {
-    board = createBrandNewBoard()
+  if (!localStorage.getItem('tasks')) {
     updateLocalStorageTasks()
   }
   renderBoard(boardDiv)
@@ -88,8 +87,10 @@ function onEnteringSite() {
  *
  */
 
-function renderBoard(fatherDiv) {
+function renderBoard() {
+  board = new Board(baseTasksLists, getLocalStorageBoardTasks())
   renderLists(listsDiv)
+  listsDiv.style.height = '';
 }
 
 function renderLists(fatherDiv) {
@@ -217,14 +218,17 @@ function clickEventHandler(event) {
     }
   } else if (targetRole === 'saving-board') {
     console.log('test0')
-    putTasksToApi()
+    startLoadAnimation()
+    putTasksToApi().then(setTimeout(() => {renderBoard()}, MIN_LOADING_TIME))
   } else if (targetRole === 'loading-board') {
     console.log('pressed button load')
+
+    startLoadAnimation();
+
     getTasksFromApi()
       .then((tasks) => {
         updateLocalStorageTasksInNativeFormat(tasks)
-        board = new Board(baseTasksLists, getLocalStorageBoardTasks())
-        renderLists(listsDiv)
+        renderBoard()
       })
       .catch((err) => console.log(err))
   }
@@ -389,7 +393,7 @@ async function getTasksFromApi() {
   console.log(response.status)
   if (response.ok) {
     let result = await response.json()
-    return result.tasks
+    return new Promise((resolve) => {setTimeout(() => {resolve(result.tasks)}, MIN_LOADING_TIME)})
   }
   console.log('get')
   await getTasksFromApi()
@@ -485,6 +489,34 @@ function checkIfObjectIdTaken(id, getFunction) {
 
 function deepCopyObj(obj) {
   return JSON.parse(JSON.stringify(obj))
+}
+
+/* 
+*
+*loading animation
+*
+*/
+
+
+function startLoadAnimation() {
+  let height = window.getComputedStyle(listsDiv).getPropertyValue('height')
+
+  removeAllChildNodes(listsDiv);
+
+  listsDiv.style.height = height
+
+  let barDiv = document.createElement("div");
+  barDiv.classList.add("bar");
+
+  let circleDiv = document.createElement("div");
+  circleDiv.classList.add("circle");
+
+  let p = document.createElement("p");
+  p.innerHTML = "Loading";
+  p.classList.add("loading-p");
+
+  barDiv.append(circleDiv, p);
+  listsDiv.append(barDiv);
 }
 
 // -------------------
