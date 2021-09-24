@@ -74,7 +74,7 @@ function createBrandNewBoard() {
 
 function onEnteringSite() {
   if (!localStorage.getItem('tasks')) {
-    updateLocalStorageTasks()
+    localStorage.setItem('tasks', JSON.stringify({ todo: [], 'in-progress': [], done: [] }))
   }
   renderBoard(boardDiv)
 }
@@ -90,7 +90,7 @@ function onEnteringSite() {
 function renderBoard() {
   board = new Board(baseTasksLists, getLocalStorageBoardTasks())
   renderLists(listsDiv)
-  listsDiv.style.height = '';
+  listsDiv.style.height = ''
 }
 
 function renderLists(fatherDiv) {
@@ -219,11 +219,15 @@ function clickEventHandler(event) {
   } else if (targetRole === 'saving-board') {
     console.log('test0')
     startLoadAnimation()
-    putTasksToApi().then(setTimeout(() => {renderBoard()}, MIN_LOADING_TIME))
+    putTasksToApi().then(
+      setTimeout(() => {
+        renderBoard()
+      }, MIN_LOADING_TIME)
+    )
   } else if (targetRole === 'loading-board') {
     console.log('pressed button load')
 
-    startLoadAnimation();
+    startLoadAnimation()
 
     getTasksFromApi()
       .then((tasks) => {
@@ -393,7 +397,11 @@ async function getTasksFromApi() {
   console.log(response.status)
   if (response.ok) {
     let result = await response.json()
-    return new Promise((resolve) => {setTimeout(() => {resolve(result.tasks)}, MIN_LOADING_TIME)})
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        resolve(result.tasks)
+      }, MIN_LOADING_TIME)
+    })
   }
   console.log('get')
   await getTasksFromApi()
@@ -491,32 +499,31 @@ function deepCopyObj(obj) {
   return JSON.parse(JSON.stringify(obj))
 }
 
-/* 
-*
-*loading animation
-*
-*/
-
+/*
+ *
+ *loading animation
+ *
+ */
 
 function startLoadAnimation() {
   let height = window.getComputedStyle(listsDiv).getPropertyValue('height')
 
-  removeAllChildNodes(listsDiv);
+  removeAllChildNodes(listsDiv)
 
   listsDiv.style.height = height
 
-  let barDiv = document.createElement("div");
-  barDiv.classList.add("bar");
+  let barDiv = document.createElement('div')
+  barDiv.classList.add('bar')
 
-  let circleDiv = document.createElement("div");
-  circleDiv.classList.add("circle");
+  let circleDiv = document.createElement('div')
+  circleDiv.classList.add('circle')
 
-  let p = document.createElement("p");
-  p.innerHTML = "Loading";
-  p.classList.add("loading-p");
+  let p = document.createElement('p')
+  p.innerHTML = 'Loading'
+  p.classList.add('loading-p')
 
-  barDiv.append(circleDiv, p);
-  listsDiv.append(barDiv);
+  barDiv.append(circleDiv, p)
+  listsDiv.append(barDiv)
 }
 
 // -------------------
