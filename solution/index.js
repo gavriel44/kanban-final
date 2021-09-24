@@ -25,11 +25,20 @@ class Board {
 
   addTask(listId, taskText) {
     const listTasks = this.getList(listId).tasks
-    listTasks.push({ text: taskText, id: generateNewIdInArrayOfObjects(listTasks) })
+    listTasks.push({ text: taskText, id: this.generateUniqueTaskId(listTasks) })
   }
 
   getList(listId) {
     return getObjectFromArray(listId, this.lists)
+  }
+
+  generateUniqueTaskId() {
+    let allTasks = []
+
+    for (let list of this.lists) {
+      allTasks.push(...list.tasks)
+    }
+    return generateNewIdInArrayOfObjects(allTasks)
   }
 
   getTask(listId, taskId) {
