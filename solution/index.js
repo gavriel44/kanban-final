@@ -105,9 +105,7 @@ function renderList(list, fatherDiv) {
   const tasks = []
 
   for (let task of list.tasks) {
-    tasks.push(
-      createElement('li', [task.text], ['task'], { 'data-original-task-id': task.id})
-    )
+    tasks.push(createElement('li', [task.text], ['task'], { 'data-original-task-id': task.id }))
   }
 
   const tasksList = createElement('ul', tasks, [list.styleClass, 'task-list'])
@@ -187,9 +185,13 @@ function filterLists() {
  */
 
 function clickEventHandler(event) {
-  const target = event.target
+  const target = event.target.closest('BUTTON')
 
-  if (target.dataset.role === 'adding-task') {
+  if (!target) return
+
+  const targetRole = target.dataset.role
+
+  if (targetRole === 'adding-task') {
     let inputValue = target.parentElement.querySelector('input').value
     if (inputValue === '') {
       alert('Cant add an empty task!')
@@ -197,6 +199,25 @@ function clickEventHandler(event) {
       let relevantListId = Number(target.parentElement.dataset.originalListId)
       addTask(relevantListId, inputValue)
     }
+  } else if (targetRole === 'adding-list') {
+    const inputValue = document.getElementById('add-new-list').value
+    if (inputValue === '') {
+      alert('Cant add an empty task!')
+    } else {
+      addNewList(inputValue)
+    }
+  } else if (targetRole === 'saving-board') {
+    console.log('test0')
+    putTasksToApi()
+  } else if (targetRole === 'loading-board') {
+    console.log('pressed button load')
+    getTasksFromApi()
+      .then((tasks) => {
+        updateLocalStorageTasksInNativeFormat(tasks)
+        board = new Board(baseTasksLists, getLocalStorageBoardTasks())
+        renderLists(listsDiv)
+      })
+      .catch((err) => console.log(err))
   }
 }
 
@@ -320,9 +341,6 @@ function updateLocalStorageTasks() {
       tasks[list.name] = list.tasks.map((task) => task.text)
     }
   }
-  function formatTasks(tasks) {
-    return tasks.map((task) => {})
-  }
 
   localStorage.setItem('tasks', JSON.stringify(tasks))
 }
@@ -338,6 +356,54 @@ function getLocalStorageBoardTasks() {
   // so our Board class can handle it properly.
   delete Object.assign(localStorageTasks, { ['to-do']: localStorageTasks['todo'] })['todo']
   return localStorageTasks
+}
+
+function getLocalStorageBoardTasksInNativeFormat() {
+  return JSON.parse(localStorage.getItem('tasks'))
+}
+
+function updateLocalStorageTasksInNativeFormat(newTasks) {
+  localStorage.setItem('tasks', JSON.stringify(newTasks))
+}
+
+// -------------------
+
+/*
+ *
+ *
+ * api methods.
+ *
+ */
+
+async function getTasksFromApi() {
+  const response = await fetch('https://json-bins.herokuapp.com/bin/614af7b24021ac0e6c080cbd')
+  console.log(response.status)
+  if (response.ok) {
+    let result = await response.json()
+    return result.tasks
+  }
+  console.log('get')
+  await getTasksFromApi()
+}
+
+async function putTasksToApi() {
+  const currentTasks = getLocalStorageBoardTasksInNativeFormat()
+
+  let response = await fetch('https://json-bins.herokuapp.com/bin/614af7b24021ac0e6c080cbd', {
+    method: 'PUT',
+    headers: {
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ tasks: currentTasks }),
+  })
+
+  if (response.ok) {
+    let result = await response.json()
+    return result.tasks
+  }
+  console.log('put')
+  await putTasksToApi()
 }
 
 // -------------------
