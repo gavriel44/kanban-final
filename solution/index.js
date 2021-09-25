@@ -149,6 +149,8 @@ function renderList(list, fatherDiv) {
     'data-role': 'adding-task',
   })
 
+  const inputDiv = createElement('div', [input, addButton], ['input-div'])
+
   const tasks = []
 
   for (let task of list.tasks) {
@@ -164,7 +166,7 @@ function renderList(list, fatherDiv) {
   const tasksList = createElement('ul', tasks, [list.styleClass, 'task-list'])
   const section = createElement(
     'section',
-    [deleteButton, listHeader, tasksList, input, addButton],
+    [deleteButton, listHeader, tasksList, inputDiv ],
     ['section', 'droppable'],
     {
       'data-original-list-id': list.id,
@@ -322,7 +324,7 @@ function clickEventHandler(event) {
     startLoadAnimation()
     setTimeout(() => {
       renderBoard()
-    }, 1000)
+    }, 100)
     putTasksToApi().catch((error) => alert(error))
   } else if (targetRole === 'loading-board') {
     console.log('pressed button load')
