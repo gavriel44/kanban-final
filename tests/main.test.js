@@ -250,7 +250,7 @@ describe(projectName, () => {
     const initialTasksCount = await countTasks()
     expect(initialTasksCount).toBe(3)
     await page.click(loadTasksFromApiBtn)
-    await page.waitForTimeout(10000)
+    await page.waitForTimeout(300)
     await expectLoaderCount(0)
     const currTasksCount = await countTasks()
     expect(currTasksCount).toBe(0)

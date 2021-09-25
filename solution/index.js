@@ -80,8 +80,6 @@ class Board {
   }
 }
 
-const MIN_LOADING_TIME = 2000
-
 const boardDiv = document.getElementById('board-div')
 const listsDiv = document.getElementById('lists-div')
 const baseTasksLists = ['to-do', 'in-progress', 'done']
@@ -95,6 +93,11 @@ function onEnteringSite() {
   if (!localStorage.getItem('tasks')) {
     localStorage.setItem('tasks', JSON.stringify({ todo: [], 'in-progress': [], done: [] }))
   }
+
+  setTimeout(() => {
+    getTasksFromApi().then((tasks) => putTasksToApi(tasks))
+  }, 3000)
+
   renderBoard(boardDiv)
 }
 
@@ -138,7 +141,7 @@ function renderList(list, fatherDiv) {
       createElement('li', [task.text], ['task', 'droppable'], {
         'data-original-task-id': task.id,
         onmousedown: 'clickDrugAndDropHandler(event)', // look down in handler functions
-        ondragstart: '() => return false',
+        ondragstart: 'onDragStart()',
       })
     )
   }
@@ -249,11 +252,10 @@ function clickEventHandler(event) {
   } else if (targetRole === 'saving-board') {
     console.log('test0')
     startLoadAnimation()
-    putTasksToApi().then(
-      setTimeout(() => {
-        renderBoard()
-      }, MIN_LOADING_TIME)
-    )
+    setTimeout(() => {
+      renderBoard()
+    }, 1000)
+    putTasksToApi().catch(error => alert(error))
   } else if (targetRole === 'loading-board') {
     console.log('pressed button load')
 
@@ -264,7 +266,7 @@ function clickEventHandler(event) {
         updateLocalStorageTasksInNativeFormat(tasks)
         renderBoard()
       })
-      .catch((err) => console.log(err))
+      .catch(error => alert(error))
   }
 }
 
@@ -321,6 +323,8 @@ function focusOutEventHandler(event) {
 
   if (target.tagName !== 'LI') return
 
+  dblClicked = false
+
   target.setAttribute('contenteditable', 'false')
 
   const task = getTaskFromLi(target)
@@ -330,13 +334,27 @@ function focusOutEventHandler(event) {
   updateLocalStorageTasks()
 }
 
+let dblClicked = false
+let mouseDown = false
+
 function dblClickEventHandler(event) {
   const target = event.target
 
   if (target.tagName !== 'LI') return
 
+  dblClicked = true
+
   target.setAttribute('contenteditable', 'true')
   target.focus()
+  function selectElementContents(el) {
+    var range = document.createRange()
+    range.selectNodeContents(el)
+    var sel = window.getSelection()
+    sel.removeAllRanges()
+    sel.addRange(range)
+  }
+
+  selectElementContents(target)
 }
 
 function getAncestorSectionListId(liElement) {
@@ -355,87 +373,109 @@ function getTaskFromLi(liElement) {
 
 // -------------
 
+function onDragStart() {
+  return false
+}
+
 function clickDrugAndDropHandler(event) {
   const target = event.target
 
-  target.classList.add('moving-task')
+  event.preventDefault()
 
-  let shiftX = event.clientX - target.getBoundingClientRect().left
-  let shiftY = event.clientY - target.getBoundingClientRect().top
+  mouseDown = true
 
-  target.style.position = 'absolute'
-  target.style.zIndex = 1000
-  document.body.append(target)
-
-  moveAt(event.pageX, event.pageY)
-
-  // moves the ball at (pageX, pageY) coordinates
-  // taking initial shifts into account
-  function moveAt(pageX, pageY) {
-    target.style.left = pageX - shiftX + 'px'
-    target.style.top = pageY - shiftY + 'px'
+  function onMouseUp(event) {
+    if (event.target === target) {
+      mouseDown = false
+    }
   }
 
-  let currentDroppable = null
+  document.addEventListener('mouseup', onMouseUp)
 
-  function onMouseMove(event) {
+  setTimeout(() => {
+    if ((dblClicked === true) || (mouseDown === false)) return
+
+    event.preventDefault()
+
+    target.classList.add('moving-task')
+
+    let shiftX = event.clientX - target.getBoundingClientRect().left
+    let shiftY = event.clientY - target.getBoundingClientRect().top
+
+    target.style.position = 'absolute'
+    target.style.zIndex = 1000
+    document.body.append(target)
+
     moveAt(event.pageX, event.pageY)
 
-    target.style.display = 'none'
-    let elemBelow = document.elementFromPoint(event.clientX, event.clientY)
-    target.style.display = ''
-
-    // mousemove events may trigger out of the window (when the ball is dragged off-screen)
-    // if clientX/clientY are out of the window, then elementFromPoint returns null
-    if (!elemBelow) return
-
-    // potential droppable are labeled with the class "droppable" (can be other logic)
-    let droppableBelow = elemBelow.closest('.droppable')
-
-    if (currentDroppable != droppableBelow) {
-      // we're flying in or out...
-      // note: both values can be null
-      //   currentDroppable=null if we were not over a droppable before this event (e.g over an empty space)
-      //   droppableBelow=null if we're not over a droppable now, during this event
-
-      if (currentDroppable) {
-        // the logic to process "flying out" of the droppable (remove highlight)
-        leaveDroppable(currentDroppable)
-      }
-      currentDroppable = droppableBelow
-      if (currentDroppable) {
-        // the logic to process "flying in" of the droppable
-        enterDroppable(currentDroppable)
-      }
+    // moves the ball at (pageX, pageY) coordinates
+    // taking initial shifts into account
+    function moveAt(pageX, pageY) {
+      target.style.left = pageX - shiftX + 'px'
+      target.style.top = pageY - shiftY + 'px'
     }
-  }
 
-  // move the ball on mousemove
-  document.addEventListener('mousemove', onMouseMove)
+    let currentDroppable = null
 
-  // drop the ball, remove unneeded handlers
-  target.onmouseup = function () {
-    if (aboveDroppable) {
-      if (currentDroppable.tagName === 'LI') {
-        const newListId = getAncestorSectionListId(currentDroppable)
-        const taskId = Number(target.dataset.originalTaskId)
-        const droppableTaskId = getTaskFromLi(currentDroppable).id
-        const droppableIndex = board.getTaskIndex(droppableTaskId)
+    function onMouseMove(event) {
+      moveAt(event.pageX, event.pageY)
 
-        moveTask(taskId, newListId, droppableIndex + 1)
-      } else {
-        const newListId = getAncestorSectionListId(currentDroppable)
-        const taskId = Number(target.dataset.originalTaskId)
+      target.style.display = 'none'
+      let elemBelow = document.elementFromPoint(event.clientX, event.clientY)
+      target.style.display = ''
 
-        moveTask(taskId, newListId)
+      // mousemove events may trigger out of the window (when the ball is dragged off-screen)
+      // if clientX/clientY are out of the window, then elementFromPoint returns null
+      if (!elemBelow) return
+
+      // potential droppable are labeled with the class "droppable" (can be other logic)
+      let droppableBelow = elemBelow.closest('.droppable')
+
+      if (currentDroppable != droppableBelow) {
+        // we're flying in or out...
+        // note: both values can be null
+        //   currentDroppable=null if we were not over a droppable before this event (e.g over an empty space)
+        //   droppableBelow=null if we're not over a droppable now, during this event
+
+        if (currentDroppable) {
+          // the logic to process "flying out" of the droppable (remove highlight)
+          leaveDroppable(currentDroppable)
+        }
+        currentDroppable = droppableBelow
+        if (currentDroppable) {
+          // the logic to process "flying in" of the droppable
+          enterDroppable(currentDroppable)
+        }
       }
     }
 
-    document.removeEventListener('mousemove', onMouseMove)
-    target.onmouseup = null
-    target.remove()
-    renderBoard()
-  }
+    // move the ball on mousemove
+    document.addEventListener('mousemove', onMouseMove)
+
+    // drop the ball, remove unneeded handlers
+    target.onmouseup = function () {
+      if (aboveDroppable) {
+        if (currentDroppable.tagName === 'LI') {
+          const newListId = getAncestorSectionListId(currentDroppable)
+          const taskId = Number(target.dataset.originalTaskId)
+          const droppableTaskId = getTaskFromLi(currentDroppable).id
+          const droppableIndex = board.getTaskIndex(droppableTaskId)
+
+          moveTask(taskId, newListId, droppableIndex + 1)
+        } else {
+          const newListId = getAncestorSectionListId(currentDroppable)
+          const taskId = Number(target.dataset.originalTaskId)
+
+          moveTask(taskId, newListId)
+        }
+      }
+
+      document.removeEventListener('mousemove', onMouseMove)
+      target.onmouseup = null
+      target.remove()
+      renderBoard()
+    }
+  }, 150)
 }
 
 let aboveDroppable = false
@@ -527,33 +567,30 @@ function updateLocalStorageTasksInNativeFormat(newTasks) {
  */
 
 async function getTasksFromApi() {
-  const response = await fetch('https://tinyurl.com/c3f3z268')
+  const response = await fetch('https://json-bins.herokuapp.com/bin/614af7b24021ac0e6c080cbd')
   console.log(response.status)
   if (response.ok) {
     let result = await response.json()
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        resolve(result.tasks)
-      }, MIN_LOADING_TIME)
-    })
+    return result.tasks
   }
   console.log('get')
   await getTasksFromApi()
 }
 
-async function putTasksToApi() {
-  const currentTasks = getLocalStorageBoardTasksInNativeFormat()
+async function putTasksToApi(tasks1 = getLocalStorageBoardTasksInNativeFormat()) {
+  await fetch('https://json-bins.herokuapp.com/bin/614af7b24021ac0e6c080cbd')
 
-  let response = await fetch('https://tinyurl.com/c3f3z268', {
+  let response = await fetch('https://json-bins.herokuapp.com/bin/614af7b24021ac0e6c080cbd', {
     method: 'PUT',
     headers: {
       Accept: 'application/json',
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ tasks: currentTasks }),
+    body: JSON.stringify({ tasks: tasks1 }),
   })
 
   if (response.ok) {
+    console.log(response.status)
     let result = await response.json()
     return result.tasks
   }
@@ -647,7 +684,7 @@ function startLoadAnimation() {
   listsDiv.style.height = height
 
   let barDiv = document.createElement('div')
-  barDiv.classList.add('bar')
+  barDiv.classList.add('bar', 'loader')
 
   let circleDiv = document.createElement('div')
   circleDiv.classList.add('circle')
