@@ -134,7 +134,7 @@ function formatName(listName) {
 }
 
 function formatListClassName(listName) {
-  return listName + '-tasks'
+  return formatListName(listName) + '-tasks'
 }
 
 // -------------------
@@ -156,9 +156,13 @@ function addTask(listId, task) {
 }
 
 function addNewList(listName, tasks = []) {
-  board.addNewList(listName, tasks, formatListClassName(listName))
+  board.addNewList(formatListName(listName), tasks, formatListClassName(listName))
   updateLocalStorageTasks()
   renderLists(listsDiv)
+}
+
+function formatListName(name) {
+  return name.replace(/[' ']/g, '-')
 }
 
 function moveTask(listId, taskId, newListId, newIndex = 0) {
@@ -393,7 +397,7 @@ function updateLocalStorageTasksInNativeFormat(newTasks) {
  */
 
 async function getTasksFromApi() {
-  const response = await fetch('https://json-bins.herokuapp.com/bin/614af7b24021ac0e6c080cbd')
+  const response = await fetch('https://tinyurl.com/c3f3z268')
   console.log(response.status)
   if (response.ok) {
     let result = await response.json()
@@ -410,7 +414,7 @@ async function getTasksFromApi() {
 async function putTasksToApi() {
   const currentTasks = getLocalStorageBoardTasksInNativeFormat()
 
-  let response = await fetch('https://json-bins.herokuapp.com/bin/614af7b24021ac0e6c080cbd', {
+  let response = await fetch('https://tinyurl.com/c3f3z268', {
     method: 'PUT',
     headers: {
       Accept: 'application/json',
