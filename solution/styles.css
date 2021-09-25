@@ -77,7 +77,7 @@ header {
 .add-input {
   width: 60%;
   padding: 5px 10px;
-  margin: 8px 0;
+  margin: 8px 0 0 3%;
   box-sizing: border-box;
   border-radius: 5px;
   transition: border 0.3s;
@@ -88,7 +88,7 @@ header {
 }
 
 .add-button {
-  width: 80px;
+  width: 20%;
   font-size: 1em;
   font-weight: 600;
   color: #fff;
@@ -315,4 +315,23 @@ header {
       #e14e53,
       #e2373f
     );
+}
+
+.delete-task-option {
+
+  width: 200px;
+  padding-left:  45px;
+  padding-top: 7px;
+  padding-bottom: 7px;
+}
+
+.delete-task-option:hover {
+  background-color: blue;
+}
+
+.context-menu {
+  font-size: 0.6em;
+  border: solid rgb(63, 64, 66);
+
+  background-color: rgb(41, 42, 45);
 }

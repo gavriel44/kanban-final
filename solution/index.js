@@ -36,6 +36,14 @@ class Board {
     this.lists.splice(this.lists.indexOf(this.getList(listId)), 1)
   }
 
+  deleteTask(taskId) {
+    const listId = this.getListIdFromTaskId(taskId)
+    const list = this.getList(listId)
+    const task = this.getTask(taskId)
+    
+    list.tasks.splice(list.tasks.indexOf(task), 1)
+  }
+
   generateUniqueTaskId() {
     let allTasks = []
 
@@ -128,7 +136,9 @@ function renderLists(fatherDiv) {
 }
 
 function renderList(list, fatherDiv) {
-  const deleteButton = createElement('button', ['delete'], ['delete-button', 'add-button'], {'data-role': 'delete-list'})
+  const deleteButton = createElement('button', ['delete'], ['delete-button', 'add-button'], {
+    'data-role': 'delete-list',
+  })
   const listHeader = createElement('h2', [formatName(list.name)], ['list-header'])
   const input = createElement('input', [], ['add-input'], {
     id: `add-${list.styleClass.slice(0, -1)}`,
@@ -152,9 +162,14 @@ function renderList(list, fatherDiv) {
   }
 
   const tasksList = createElement('ul', tasks, [list.styleClass, 'task-list'])
-  const section = createElement('section', [deleteButton, listHeader, tasksList, input, addButton], ['section', 'droppable'], {
-    'data-original-list-id': list.id,
-  })
+  const section = createElement(
+    'section',
+    [deleteButton, listHeader, tasksList, input, addButton],
+    ['section', 'droppable'],
+    {
+      'data-original-list-id': list.id,
+    }
+  )
 
   fatherDiv.append(section)
 }
@@ -200,6 +215,12 @@ function deleteList(listId) {
   renderLists(listsDiv)
 }
 
+function deleteTask(taskId) {
+  board.deleteTask(taskId)
+  updateLocalStorageTasks()
+  renderLists(listsDiv)
+}
+
 function formatListName(name) {
   return name.replace(/[' ']/g, '-')
 }
@@ -237,6 +258,42 @@ function filterLists() {
  * event handling functions.
  *
  */
+
+function contextClickHandler(event) {
+  const prevMenu = document.querySelector('.context-menu')
+  if (prevMenu) prevMenu.remove()
+
+  const target = event.target.closest('LI')
+
+  if (!target) return
+
+  event.preventDefault()
+
+  const menuOptionDelete = createElement('div', ['delete task'], ['delete-task-option'])
+  const contextMenu = createElement('div', [menuOptionDelete], ['context-menu'])
+
+  menuOptionDelete.addEventListener('click', removeTask)
+
+  function removeTask() {
+    const taskId = getLiTaskId(target)
+    deleteTask(taskId)
+  }
+
+  contextMenu.style.position = 'absolute'
+  contextMenu.style.zIndex = 1000
+  document.body.append(contextMenu)
+
+  contextMenu.style.left = event.pageX + 'px'
+  contextMenu.style.top = event.pageY + 'px'
+
+  document.addEventListener('click', exitContextMenuHandler)
+
+  function exitContextMenuHandler(event) {
+    contextMenu.remove()
+    document.removeEventListener('onclick', exitContextMenuHandler)
+
+  }
+}
 
 function clickEventHandler(event) {
   const target = event.target.closest('BUTTON')
@@ -517,6 +574,7 @@ document.addEventListener('mouseover', mouseOverEventHandler)
 document.addEventListener('mouseout', mouseOutEventHandler)
 
 document.addEventListener('click', clickEventHandler)
+document.addEventListener('contextmenu', contextClickHandler)
 
 document.addEventListener('dblclick', dblClickEventHandler)
 
@@ -541,7 +599,7 @@ function updateLocalStorageTasks() {
   const tasks = {
     todo: [],
     'in-progress': [],
-    done: []
+    done: [],
   }
 
   for (let list of board.lists) {
@@ -592,7 +650,7 @@ async function getTasksFromApi() {
     let result = await response.json()
     return result.tasks
   }
-  console.log('get')
+  alert('server error - trying again')
   await getTasksFromApi()
 }
 
@@ -613,7 +671,7 @@ async function putTasksToApi(tasks1 = getLocalStorageBoardTasksInNativeFormat())
     let result = await response.json()
     return result.tasks
   }
-  console.log('put')
+  alert('server error - trying again')
   await putTasksToApi()
 }
 
