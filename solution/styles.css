@@ -58,13 +58,16 @@ header {
 .section {
   border: solid black;
   font-size: 1.2rem;
-  text-align: center;
   color: #9a1750;
   width: 31%;
   background-color: #e3afbc;
   border-radius: 15px;
   text-shadow: none;
   margin: 1.5em 0;
+}
+
+.section h2 {
+  text-align: center;
 }
 
 .add-input {
@@ -122,6 +125,7 @@ header {
 }
 
 .task {
+  text-align: center;
   font: 200 20px/1.5;
   height: 1.5em;
   line-height: 1.5em;
@@ -145,6 +149,15 @@ header {
 .task:hover {
   font-size: 30px;
   background: #f6f6f6;
+}
+
+.moving-task {
+  width: 300px;
+  opacity: 0.7;
+}
+
+.below-drag {
+  border-bottom: solid black;
 }
 
 #action-div {

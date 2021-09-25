@@ -41,8 +41,27 @@ class Board {
     return generateNewIdInArrayOfObjects(allTasks)
   }
 
-  getTask(listId, taskId) {
-    return getObjectFromArray(taskId, this.getList(listId).tasks)
+  getTask(taskId) {
+    const allTasks = []
+
+    for (let list of this.lists) {
+      allTasks.push(...list.tasks)
+    }
+
+    return getObjectFromArray(taskId, allTasks)
+  }
+
+  getListIdFromTaskId(taskId) {
+    for (let list of this.lists) {
+      for (let task of list.tasks) {
+        if (task.id === taskId) return list.id
+      }
+    }
+    throw new Error(`there is no taskId: ${taskId}`)
+  }
+
+  getTaskIndex(taskId) {
+    return this.getList(this.getListIdFromTaskId(taskId)).tasks.indexOf(this.getTask(taskId))
   }
 
   getListByName(listName) {
@@ -115,11 +134,17 @@ function renderList(list, fatherDiv) {
   const tasks = []
 
   for (let task of list.tasks) {
-    tasks.push(createElement('li', [task.text], ['task'], { 'data-original-task-id': task.id }))
+    tasks.push(
+      createElement('li', [task.text], ['task', 'droppable'], {
+        'data-original-task-id': task.id,
+        onmousedown: 'clickDrugAndDropHandler(event)', // look down in handler functions
+        ondragstart: '() => return false',
+      })
+    )
   }
 
   const tasksList = createElement('ul', tasks, [list.styleClass, 'task-list'])
-  const section = createElement('section', [listHeader, tasksList, input, addButton], ['section'], {
+  const section = createElement('section', [listHeader, tasksList, input, addButton], ['section', 'droppable'], {
     'data-original-list-id': list.id,
   })
 
@@ -165,9 +190,10 @@ function formatListName(name) {
   return name.replace(/[' ']/g, '-')
 }
 
-function moveTask(listId, taskId, newListId, newIndex = 0) {
-  const task = board.getTask(listId, taskId)
-  const oldList = board.getList(listId)
+function moveTask(taskId, newListId, newIndex = 0) {
+  const task = board.getTask(taskId)
+  const oldListId = board.getListIdFromTaskId(taskId)
+  const oldList = board.getList(oldListId)
   const newList = board.getList(newListId)
 
   oldList.tasks.splice(oldList.tasks.indexOf(task), 1)
@@ -262,7 +288,7 @@ function numberKeyDownEventHandler(event) {
     const taskId = getLiTaskId(liMouseIsIn)
     const newListId = Number(keyPressed)
 
-    moveTask(listId, taskId, newListId)
+    moveTask(taskId, newListId)
     liMouseIsIn = null // the task has moved so the mouse is no longer inside it.
   }
 }
@@ -322,11 +348,115 @@ function getLiTaskId(liElement) {
 }
 
 function getTaskFromLi(liElement) {
-  const relevantListId = getAncestorSectionListId(liElement)
   const taskId = getLiTaskId(liElement)
 
-  return board.getTask(relevantListId, taskId)
+  return board.getTask(taskId)
 }
+
+// -------------
+
+function clickDrugAndDropHandler(event) {
+  const target = event.target
+
+  target.classList.add('moving-task')
+
+  let shiftX = event.clientX - target.getBoundingClientRect().left
+  let shiftY = event.clientY - target.getBoundingClientRect().top
+
+  target.style.position = 'absolute'
+  target.style.zIndex = 1000
+  document.body.append(target)
+
+  moveAt(event.pageX, event.pageY)
+
+  // moves the ball at (pageX, pageY) coordinates
+  // taking initial shifts into account
+  function moveAt(pageX, pageY) {
+    target.style.left = pageX - shiftX + 'px'
+    target.style.top = pageY - shiftY + 'px'
+  }
+
+  let currentDroppable = null
+
+  function onMouseMove(event) {
+    moveAt(event.pageX, event.pageY)
+
+    target.style.display = 'none'
+    let elemBelow = document.elementFromPoint(event.clientX, event.clientY)
+    target.style.display = ''
+
+    // mousemove events may trigger out of the window (when the ball is dragged off-screen)
+    // if clientX/clientY are out of the window, then elementFromPoint returns null
+    if (!elemBelow) return
+
+    // potential droppable are labeled with the class "droppable" (can be other logic)
+    let droppableBelow = elemBelow.closest('.droppable')
+
+    if (currentDroppable != droppableBelow) {
+      // we're flying in or out...
+      // note: both values can be null
+      //   currentDroppable=null if we were not over a droppable before this event (e.g over an empty space)
+      //   droppableBelow=null if we're not over a droppable now, during this event
+
+      if (currentDroppable) {
+        // the logic to process "flying out" of the droppable (remove highlight)
+        leaveDroppable(currentDroppable)
+      }
+      currentDroppable = droppableBelow
+      if (currentDroppable) {
+        // the logic to process "flying in" of the droppable
+        enterDroppable(currentDroppable)
+      }
+    }
+  }
+
+  // move the ball on mousemove
+  document.addEventListener('mousemove', onMouseMove)
+
+  // drop the ball, remove unneeded handlers
+  target.onmouseup = function () {
+    if (aboveDroppable) {
+      if (currentDroppable.tagName === 'LI') {
+        const newListId = getAncestorSectionListId(currentDroppable)
+        const taskId = Number(target.dataset.originalTaskId)
+        const droppableTaskId = getTaskFromLi(currentDroppable).id
+        const droppableIndex = board.getTaskIndex(droppableTaskId)
+
+        moveTask(taskId, newListId, droppableIndex + 1)
+      } else {
+        const newListId = getAncestorSectionListId(currentDroppable)
+        const taskId = Number(target.dataset.originalTaskId)
+
+        moveTask(taskId, newListId)
+      }
+    }
+
+    document.removeEventListener('mousemove', onMouseMove)
+    target.onmouseup = null
+    target.remove()
+    renderBoard()
+  }
+}
+
+let aboveDroppable = false
+
+function enterDroppable(droppableElement) {
+  aboveDroppable = true
+
+  if (droppableElement.tagName === 'LI') {
+    droppableElement.classList.add('below-drag')
+  }
+}
+
+function leaveDroppable(droppableElement) {
+  aboveDroppable = false
+
+  if (droppableElement.tagName === 'LI') {
+    droppableElement.classList.remove('below-drag')
+  }
+}
+
+// -------------
 
 document.addEventListener('keydown', altKeyDownEventHandler)
 document.addEventListener('mouseover', mouseOverEventHandler)
