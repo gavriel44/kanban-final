@@ -32,6 +32,10 @@ class Board {
     return getObjectFromArray(listId, this.lists)
   }
 
+  deleteList(listId) {
+    this.lists.splice(this.lists.indexOf(this.getList(listId)), 1)
+  }
+
   generateUniqueTaskId() {
     let allTasks = []
 
@@ -124,6 +128,7 @@ function renderLists(fatherDiv) {
 }
 
 function renderList(list, fatherDiv) {
+  const deleteButton = createElement('button', ['delete'], ['delete-button', 'add-button'], {'data-role': 'delete-list'})
   const listHeader = createElement('h2', [formatName(list.name)], ['list-header'])
   const input = createElement('input', [], ['add-input'], {
     id: `add-${list.styleClass.slice(0, -1)}`,
@@ -147,7 +152,7 @@ function renderList(list, fatherDiv) {
   }
 
   const tasksList = createElement('ul', tasks, [list.styleClass, 'task-list'])
-  const section = createElement('section', [listHeader, tasksList, input, addButton], ['section', 'droppable'], {
+  const section = createElement('section', [deleteButton, listHeader, tasksList, input, addButton], ['section', 'droppable'], {
     'data-original-list-id': list.id,
   })
 
@@ -185,6 +190,12 @@ function addTask(listId, task) {
 
 function addNewList(listName, tasks = []) {
   board.addNewList(formatListName(listName), tasks, formatListClassName(listName))
+  updateLocalStorageTasks()
+  renderLists(listsDiv)
+}
+
+function deleteList(listId) {
+  board.deleteList(listId)
   updateLocalStorageTasks()
   renderLists(listsDiv)
 }
@@ -239,7 +250,7 @@ function clickEventHandler(event) {
     if (inputValue === '') {
       alert('Cant add an empty task!')
     } else {
-      let relevantListId = Number(target.parentElement.dataset.originalListId)
+      let relevantListId = getAncestorSectionListId(target)
       addTask(relevantListId, inputValue)
     }
   } else if (targetRole === 'adding-list') {
@@ -255,7 +266,7 @@ function clickEventHandler(event) {
     setTimeout(() => {
       renderBoard()
     }, 1000)
-    putTasksToApi().catch(error => alert(error))
+    putTasksToApi().catch((error) => alert(error))
   } else if (targetRole === 'loading-board') {
     console.log('pressed button load')
 
@@ -266,7 +277,10 @@ function clickEventHandler(event) {
         updateLocalStorageTasksInNativeFormat(tasks)
         renderBoard()
       })
-      .catch(error => alert(error))
+      .catch((error) => alert(error))
+  } else if (targetRole === 'delete-list') {
+    let relevantListId = getAncestorSectionListId(target)
+    deleteList(relevantListId)
   }
 }
 
@@ -393,7 +407,7 @@ function clickDrugAndDropHandler(event) {
   document.addEventListener('mouseup', onMouseUp)
 
   setTimeout(() => {
-    if ((dblClicked === true) || (mouseDown === false)) return
+    if (dblClicked === true || mouseDown === false) return
 
     event.preventDefault()
 
@@ -475,7 +489,7 @@ function clickDrugAndDropHandler(event) {
       target.remove()
       renderBoard()
     }
-  }, 150)
+  }, 300)
 }
 
 let aboveDroppable = false
@@ -524,7 +538,12 @@ document.addEventListener('focusout', focusOutEventHandler)
  */
 
 function updateLocalStorageTasks() {
-  const tasks = {}
+  const tasks = {
+    todo: [],
+    'in-progress': [],
+    done: []
+  }
+
   for (let list of board.lists) {
     if (list.name === 'to-do') {
       tasks['todo'] = list.tasks.map((task) => task.text)
@@ -700,3 +719,5 @@ function startLoadAnimation() {
 // -------------------
 
 onEnteringSite()
+
+// -------------------

@@ -51,6 +51,10 @@ header {
   
 }
 
+.list-header {
+  margin: 10px 0 20px;
+}
+
 #board-div {
   padding: 0 0 1.5rem 0;
 }
@@ -301,3 +305,14 @@ header {
   75% {left: 100%; -webkit-transform: rotate(450deg); width: 150px; height: 150px;}
   100% {right: 100%;}
 } 
+
+.delete-button {
+  margin: 10px 0 0px 10px;
+  background-image: linear-gradient(
+      to right,
+      #fc202b,
+      #f15e64,
+      #e14e53,
+      #e2373f
+    );
+}
