@@ -2,9 +2,26 @@
 
 class Board {
   constructor(baseTasksLists, tasks = {}) {
-    // the first thing we do is to add the base lists so they always be in the same order when we render them
-    // the problem is this: when we save the board in the localStorage we
-    // cant keep the order so we force the order off the first base lists
+    /*
+    the first thing we do is to add the base lists so they always
+    be in the same order when we render them. (todo, in-progress, done)
+    The problem is this:
+    when we save the board in the localStorage we
+    cant keep the order, we save in object form, so we force the order off the first base lists.
+
+    **tasks - the lists in the localStorage format. We keep the name for clarity,
+    but for each property of the object, tasks, we create a new list.
+
+    ~ tasks object example:
+
+    tasks = {
+      todo: [],
+      'in-progress, ["im a task", "me to"]],
+      done: [],
+      'list-i-added': ["hello world"],
+    }
+    
+    */
     this.baseTasksLists = baseTasksLists
     this.lists = []
     for (let listName of this.baseTasksLists) {
@@ -40,7 +57,7 @@ class Board {
     const listId = this.getListIdFromTaskId(taskId)
     const list = this.getList(listId)
     const task = this.getTask(taskId)
-    
+
     list.tasks.splice(list.tasks.indexOf(task), 1)
   }
 
@@ -92,7 +109,6 @@ class Board {
   }
 }
 
-const boardDiv = document.getElementById('board-div')
 const listsDiv = document.getElementById('lists-div')
 const baseTasksLists = ['to-do', 'in-progress', 'done']
 let board
@@ -101,16 +117,27 @@ function createBrandNewBoard() {
   return new Board(baseTasksLists)
 }
 
+/*
+ *
+ * When entering the site or refreshing the page we check
+ * if we have a localStorage tasks object set up.
+ * if not, we create one in base form.
+ *
+ * After that we render the board.
+ */
+
 function onEnteringSite() {
   if (!localStorage.getItem('tasks')) {
     localStorage.setItem('tasks', JSON.stringify({ todo: [], 'in-progress': [], done: [] }))
   }
 
+  // I found that the first request to the server takes more time.
+  // So, I make a request new so that later it will be quicker.
   setTimeout(() => {
     getTasksFromApi().then((tasks) => putTasksToApi(tasks))
   }, 3000)
 
-  renderBoard(boardDiv)
+  renderBoard()
 }
 
 // -------------------
@@ -121,10 +148,18 @@ function onEnteringSite() {
  *
  */
 
+/*
+ *
+ * renderBoard - creates a new board from localStorage
+ * and renders the lists.
+ * optional for the future - adding renderCalender() and
+ * what we want to add to the board class 
+ * 
+ */
 function renderBoard() {
   board = new Board(baseTasksLists, getLocalStorageBoardTasks())
   renderLists(listsDiv)
-  listsDiv.style.height = ''
+  // renderCalender(calenderDiv)
 }
 
 function renderLists(fatherDiv) {
@@ -136,6 +171,8 @@ function renderLists(fatherDiv) {
 }
 
 function renderList(list, fatherDiv) {
+  fatherDiv.style.height = ''
+
   const deleteButton = createElement('button', ['delete'], ['delete-button', 'add-button'], {
     'data-role': 'delete-list',
   })
@@ -164,14 +201,9 @@ function renderList(list, fatherDiv) {
   }
 
   const tasksList = createElement('ul', tasks, [list.styleClass, 'task-list'])
-  const section = createElement(
-    'section',
-    [deleteButton, listHeader, tasksList, inputDiv ],
-    ['section', 'droppable'],
-    {
-      'data-original-list-id': list.id,
-    }
-  )
+  const section = createElement('section', [deleteButton, listHeader, tasksList, inputDiv], ['section', 'droppable'], {
+    'data-original-list-id': list.id,
+  })
 
   fatherDiv.append(section)
 }
@@ -293,7 +325,6 @@ function contextClickHandler(event) {
   function exitContextMenuHandler(event) {
     contextMenu.remove()
     document.removeEventListener('onclick', exitContextMenuHandler)
-
   }
 }
 
