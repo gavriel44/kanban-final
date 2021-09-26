@@ -27,7 +27,7 @@
 This project is a task to do list website. Here you can orginize your tasks
 and make sure you don't miss on anything important!
 
-Link to the github pages: [Gavriels kanban board](https://www.example.com)
+Link to the github pages: [Gavriels kanban board](https://gavriel44.github.io/kanban-final/solution/)
 
 ### Built With
 
@@ -102,4 +102,4 @@ We will give a fue examples for using the website. there are more but we wont li
 
 Gavriel Frant - email: gavril44@gmail.com
 
-Project Link: [Gavriels kanban board](https://www.example.com)
+Project Link: [Gavriels kanban board](https://gavriel44.github.io/kanban-final/solution/)
