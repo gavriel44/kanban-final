@@ -169,6 +169,8 @@ header {
 .moving-task {
   width: 300px;
   opacity: 0.7;
+  font-size: 30px;
+  background: #f6f6f6;
 }
 
 .below-drag {

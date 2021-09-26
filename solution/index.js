@@ -485,7 +485,7 @@ function clickDrugAndDropHandler(event) {
     // taking initial shifts into account
     function moveAt(pageX, pageY) {
       target.style.left = pageX - shiftX + 'px'
-      target.style.top = pageY - shiftY + 'px'
+      target.style.top = pageY - shiftY - 5 + 'px'
     }
 
     let currentDroppable = null
