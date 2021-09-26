@@ -43,6 +43,12 @@ important files:
 - index.js - The js logic
 - styles.css - The styles
 
+### Flowchart Diagram
+
+This diagram explains the rendering and butting of the program.
+
+![add task](solution/readMeImages/diagram.PNG?raw=true 'diagram')
+
 <!-- GETTING STARTED -->
 
 ## Getting Started
@@ -70,21 +76,21 @@ We will give a fue examples for using the website. there are more but we wont li
 1. Add task:
    enter the task text in the input off the relevant list and press the add button.
 
-   ![add task](solution\readMeImages\addTask.PNG?raw=true 'Live_server')
+   ![add task](solution\readMeImages\addTask.PNG?raw=true 'add task')
 
 2. Add a new list:
    Enter the new list name in the input and press the add new list button.
 
-   ![add new list](solution/readMeImages/addNewList.PNG?raw=true 'Live_server')
+   ![add new list](solution/readMeImages/addNewList.PNG?raw=true 'add new list')
 
 3. Delete task:
    press right click on the task and click delete task in the popup context menu.
 
-   ![delete task](solution/readMeImages/deleteTask.PNG?raw=true 'Live_server')
+   ![delete task](solution/readMeImages/deleteTask.PNG?raw=true 'delete task')
 
 4. Use drag and drop to order the tasks as you like.
 
-   ![drag and drop](solution/readMeImages/dragAndDrop.PNG?raw=true 'Live_server')
+   ![drag and drop](solution/readMeImages/dragAndDrop.PNG?raw=true 'drag and drop')
 
 5. delete a list.
 
