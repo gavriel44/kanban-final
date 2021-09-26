@@ -1,7 +1,20 @@
 'use strict'
 
+/*
+ * The mane Board class.
+ *
+ * every render off the UI is done thru the board object
+ * the basic structure is like this:
+ *
+ * board = {
+ *  lists: [{ id: 1, name: 'done', tasks: [], styleclass: 'done-tasks'}, {}, ...],
+ *  baseTasksList = []
+ * }
+ *
+ */
+
 class Board {
-  constructor(baseTasksLists, tasks = {}) {
+  constructor(BASE_TASKS_LISTS, tasks = {}) {
     /*
     the first thing we do is to add the base lists so they always
     be in the same order when we render them. (todo, in-progress, done)
@@ -22,14 +35,14 @@ class Board {
     }
     
     */
-    this.baseTasksLists = baseTasksLists
+    this.BASE_TASKS_LISTS = BASE_TASKS_LISTS
     this.lists = []
-    for (let listName of this.baseTasksLists) {
+    for (let listName of this.BASE_TASKS_LISTS) {
       this.addNewList(listName, [], formatListClassName(listName))
     }
 
     for (let newTaskListName in tasks) {
-      if (this.baseTasksLists.includes(newTaskListName)) {
+      if (this.BASE_TASKS_LISTS.includes(newTaskListName)) {
         const alreadyExistsList = this.getListByName(newTaskListName)
         tasks[newTaskListName].forEach((taskText) => this.addTask(alreadyExistsList.id, taskText))
       } else {
@@ -109,15 +122,13 @@ class Board {
   }
 }
 
-const listsDiv = document.getElementById('lists-div')
-const baseTasksLists = ['to-do', 'in-progress', 'done']
+// constants for us to use.
+const LISTS_DIV = document.getElementById('lists-div')
+const BASE_TASKS_LISTS = ['to-do', 'in-progress', 'done']
 let board
 
-function createBrandNewBoard() {
-  return new Board(baseTasksLists)
-}
-
 /*
+ * ENTERING FUNCTION.
  *
  * When entering the site or refreshing the page we check
  * if we have a localStorage tasks object set up.
@@ -157,13 +168,13 @@ function onEnteringSite() {
  *
  */
 function renderBoard() {
-  board = new Board(baseTasksLists, getLocalStorageBoardTasks())
-  renderLists(listsDiv)
+  board = new Board(BASE_TASKS_LISTS, getLocalStorageBoardTasks())
+  renderLists(LISTS_DIV)
   // renderCalender(calenderDiv)
 }
 
 function renderLists(fatherDiv) {
-  removeAllChildNodes(listsDiv)
+  removeAllChildNodes(LISTS_DIV)
 
   for (let list of board.lists) {
     renderList(list, fatherDiv)
@@ -172,8 +183,8 @@ function renderLists(fatherDiv) {
 
 /*
  *
- * renderList - creates each task and adn insert it into ul
- * then renders to the listsDiv
+ * renderList - creates each task and insert it into ul
+ * then renders to the LISTS_DIV
  *
  */
 
@@ -243,25 +254,25 @@ function addTask(listId, taskText) {
   board.addTask(listId, taskText)
   updateLocalStorageTasks()
 
-  renderLists(listsDiv)
+  renderLists(LISTS_DIV)
 }
 
 function addNewList(listName, tasks = []) {
   board.addNewList(formatListName(listName), tasks, formatListClassName(listName))
   updateLocalStorageTasks()
-  renderLists(listsDiv)
+  renderLists(LISTS_DIV)
 }
 
 function deleteList(listId) {
   board.deleteList(listId)
   updateLocalStorageTasks()
-  renderLists(listsDiv)
+  renderLists(LISTS_DIV)
 }
 
 function deleteTask(taskId) {
   board.deleteTask(taskId)
   updateLocalStorageTasks()
-  renderLists(listsDiv)
+  renderLists(LISTS_DIV)
 }
 
 function moveTask(taskId, newListId, newIndex = 0) {
@@ -274,8 +285,16 @@ function moveTask(taskId, newListId, newIndex = 0) {
   newList.tasks.splice(newIndex, 0, task)
 
   updateLocalStorageTasks()
-  renderLists(listsDiv)
+  renderLists(LISTS_DIV)
 }
+
+// -------------------
+/*
+ *
+ *
+ * event handling functions.
+ *
+ */
 
 // this function is for the search input at the top of the page.
 // onkeyup="filterLists()" --> look in html
@@ -290,14 +309,6 @@ function filterLists() {
     liElement.style.display = liValue.search(new RegExp(valueInput.replace(/\s+/, '|'))) != -1 ? '' : 'none'
   }
 }
-
-// -------------------
-/*
- *
- *
- * event handling functions.
- *
- */
 
 // will activate when user press right click on a task
 // this will display the context menu.
@@ -510,8 +521,9 @@ function getTaskFromLi(liElement) {
  * drag and drop handlers
  *
  * IMPORTANT! - these functions go on the HTML element itself
- * in renderList() we create a tasks with an
- * "onclick" = "clickDrugAndDropHandler(event)" attribute.
+ * in renderList() we create tasks with an
+ * "onclick" = "clickDrugAndDropHandler(event)" and
+ * "ondragstart" = "onDragStart()" attributes.
  *
  */
 
@@ -537,7 +549,7 @@ function clickDrugAndDropHandler(event) {
 
   // the main drag and drop section!
   // we set a time out so the user can make a dblclick without starting to drag
-  // I found that the best time is 300 ms. micerosoft says its 500 ms ;)
+  // I found that the best time is 300 ms. microsoft says its 500 ms ;)
   const TIME_FOR_USER_TO_DBL_CLICK = 300
 
   setTimeout(() => {
@@ -758,16 +770,16 @@ async function putTasksToApi(tasks1 = getLocalStorageBoardTasksInNativeFormat())
 /*
  *
  * loading animation.
- * renders a cool animation to the listsDiv
+ * renders a cool animation to the LISTS_DIV
  *
  */
 
 function startLoadAnimation() {
-  let height = window.getComputedStyle(listsDiv).getPropertyValue('height')
+  let height = window.getComputedStyle(LISTS_DIV).getPropertyValue('height')
 
-  removeAllChildNodes(listsDiv)
+  removeAllChildNodes(LISTS_DIV)
 
-  listsDiv.style.height = height
+  LISTS_DIV.style.height = height
 
   let barDiv = document.createElement('div')
   barDiv.classList.add('bar', 'loader')
@@ -780,7 +792,7 @@ function startLoadAnimation() {
   p.classList.add('loading-p')
 
   barDiv.append(circleDiv, p)
-  listsDiv.append(barDiv)
+  LISTS_DIV.append(barDiv)
 }
 
 // -------------------
