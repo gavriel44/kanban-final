@@ -7,7 +7,7 @@
  * the basic structure is like this:
  *
  * board = {
- *  lists: [{ id: 1, name: 'done', tasks: [], styleclass: 'done-tasks'}, {}, ...],
+ *  lists: [{ id: 1, name: 'done', tasks: [{id: 1, text: 'I am a task'}, {}...], styleclass: 'done-tasks'}, {}, ...],
  *  baseTasksList = []
  * }
  *
@@ -141,12 +141,6 @@ function onEnteringSite() {
   if (!localStorage.getItem('tasks')) {
     localStorage.setItem('tasks', JSON.stringify({ todo: [], 'in-progress': [], done: [] }))
   }
-
-  // I found that the first request to the server takes more time.
-  // So, I make a request new so that later it will be quicker.
-  setTimeout(() => {
-    getTasksFromApi().then((tasks) => putTasksToApi(tasks))
-  }, 3000)
 
   renderBoard()
 }
@@ -382,7 +376,7 @@ function clickEventHandler(event) {
     startLoadAnimation()
     setTimeout(() => {
       renderBoard()
-    }, 100)
+    }, 1000)
     putTasksToApi().catch((error) => alert(error))
   } else if (targetRole === 'loading-board') {
     console.log('pressed button load')
