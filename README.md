@@ -22,7 +22,7 @@
 
 ## About The Project
 
-![Live server](solution\readMeImages\front.PNG?raw=true 'Live_server')
+![Live server](solution/readMeImages/front.PNG?raw=true 'Live_server')
 
 This project is a task to do list website. Here you can orginize your tasks
 and make sure you don't miss on anything important!
@@ -59,7 +59,7 @@ To get a local copy up and running follow these simple steps.
    ```
 3. open the index.html file in the browser. I recommend using Live server for that.
 
-   ![Live server](solution\readMeImages\Live_server.JPG?raw=true 'Live_server')
+   ![Live server](solution/readMeImages/Live_server.JPG?raw=true 'Live_server')
 
 <!-- USAGE EXAMPLES -->
 
@@ -75,16 +75,16 @@ We will give a fue examples for using the website. there are more but we wont li
 2. Add a new list:
    Enter the new list name in the input and press the add new list button.
 
-   ![add new list](solution\readMeImages\addNewList.PNG?raw=true 'Live_server')
+   ![add new list](solution/readMeImages/addNewList.PNG?raw=true 'Live_server')
 
 3. Delete task:
    press right click on the task and click delete task in the popup context menu.
 
-   ![delete task](solution\readMeImages\deleteTask.PNG?raw=true 'Live_server')
+   ![delete task](solution/readMeImages/deleteTask.PNG?raw=true 'Live_server')
 
 4. Use drag and drop to order the tasks as you like.
 
-   ![drag and drop](solution\readMeImages\dragAndDrop.PNG?raw=true 'Live_server')
+   ![drag and drop](solution/readMeImages/dragAndDrop.PNG?raw=true 'Live_server')
 
 5. delete a list.
 
@@ -96,4 +96,4 @@ We will give a fue examples for using the website. there are more but we wont li
 
 Gavriel Frant - email: gavril44@gmail.com
 
-Project Link: [https://github.com/github_username/repo_name](https://github.com/github_username/repo_name)
+Project Link: [Gavriels kanban board](https://www.example.com)
