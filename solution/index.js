@@ -373,11 +373,12 @@ function clickEventHandler(event) {
     }
   } else if (targetRole === 'saving-board') {
     console.log('test0')
+    putTasksToApi().catch((error) => alert(error))
     startLoadAnimation()
     setTimeout(() => {
       renderBoard()
-    }, 1000)
-    putTasksToApi().catch((error) => alert(error))
+    }, 100)
+    
   } else if (targetRole === 'loading-board') {
     console.log('pressed button load')
 
@@ -741,7 +742,6 @@ async function getTasksFromApi() {
 }
 
 async function putTasksToApi(tasks1 = getLocalStorageBoardTasksInNativeFormat()) {
-  await fetch('https://json-bins.herokuapp.com/bin/614af7b24021ac0e6c080cbd')
 
   let response = await fetch('https://json-bins.herokuapp.com/bin/614af7b24021ac0e6c080cbd', {
     method: 'PUT',
