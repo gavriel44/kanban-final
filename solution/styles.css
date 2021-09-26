@@ -48,7 +48,7 @@ header {
 .lists-div {
   filter: drop-shadow(20px 10px 20px #c4c2c4);
   box-sizing: border-box;
-  width: 75%;
+  width: 70%;
   margin: 2em auto;
   border-radius: 30px;
   background-color: #e3e2df;
@@ -367,4 +367,18 @@ header {
   font-size: 0.6em;
   border: solid rgb(63, 64, 66);
   background-color: rgb(41, 42, 45);
+}
+
+/* media query's */
+
+@media (max-width: 1300px) {
+  .lists-div {
+    width: 95%;
+  }
+
+  @media (max-width: 700px) {
+    .lists-div {
+      width: 100%;
+    }
+  }
 }
