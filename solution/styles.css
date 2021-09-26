@@ -1,13 +1,14 @@
 @import url('https://fonts.googleapis.com/css2?family=Nanum+Gothic&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@200&display=swap');
 
+/* Generale styles */
+
 html {
   margin: 0;
   height: 100%;
 }
 
 body {
-  /* font-family: 'Nanum Gothic', sans-serif; */
   font-family: 'Poppins', sans-serif;
   background-color: #e3e2df;
   font-size: 1.5em;
@@ -20,6 +21,8 @@ body {
 h1 {
   font-size: 1.8em;
 }
+
+/* Header styles */
 
 header {
   padding: 0 12.5% 0 12.5%;
@@ -34,6 +37,12 @@ header {
   margin: auto 0;
   border: solid #5d001e;
   border-radius: 15px;
+}
+
+/* board styles */
+
+#board-div {
+  padding: 0 0 1.5rem 0;
 }
 
 .lists-div {
@@ -57,10 +66,7 @@ header {
   margin: 10px 0 20px;
 }
 
-#board-div {
-  padding: 0 0 1.5rem 0;
-}
-
+/* this is the section style i.e the generale list style */
 .section {
   font-size: 1.2rem;
   color: #5d001e;
@@ -103,7 +109,7 @@ header {
   font-weight: 600;
   color: #fff;
   cursor: pointer;
-  
+
   height: 35px;
   text-align: center;
   border: none;
@@ -131,13 +137,17 @@ header {
   background-image: linear-gradient(to right, #29323c, #485563, #2b5876, #4e4376);
 }
 
+.delete-button {
+  font-size: 0.8em;
+  margin: 10px 0 0px 10px;
+  background-image: linear-gradient(to right, #fc202b, #f15e64, #e14e53, #e2373f);
+}
+
 .task-list {
   list-style-type: none;
   margin: 0;
   padding: 0;
 }
-
-
 
 .task {
   text-align: center;
@@ -173,9 +183,13 @@ header {
   background: #f6f6f6;
 }
 
+/* the style to implement when we 
+ drag a task and we are above another */
 .below-drag {
-  border-bottom: solid black;
+  border-bottom: solid 3px black;
 }
+
+/* the save, load and create new list section styles */
 
 #action-div {
   flex-wrap: nowrap;
@@ -281,6 +295,8 @@ header {
   height: 40px;
 }
 
+/* Loading animation styles */
+
 .bar {
   position: relative;
   height: 2px;
@@ -333,11 +349,7 @@ header {
   }
 }
 
-.delete-button {
-  font-size: 0.8em;
-  margin: 10px 0 0px 10px;
-  background-image: linear-gradient(to right, #fc202b, #f15e64, #e14e53, #e2373f);
-}
+/* context menu options styles */
 
 .delete-task-option {
   margin-top: 3px;
