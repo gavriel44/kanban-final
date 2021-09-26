@@ -47,7 +47,7 @@ important files:
 
 This diagram explains the rendering and butting of the program.
 
-![add task](solution/readMeImages/diagram.PNG?raw=true 'diagram')
+![add task](solution/readMeImages/diagram2.PNG?raw=true 'diagram')
 
 <!-- GETTING STARTED -->
 
