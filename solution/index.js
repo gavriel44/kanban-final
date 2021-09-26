@@ -372,15 +372,13 @@ function clickEventHandler(event) {
       addNewList(inputValue)
     }
   } else if (targetRole === 'saving-board') {
-    console.log('test0')
     putTasksToApi().catch((error) => alert(error))
     startLoadAnimation()
     setTimeout(() => {
       renderBoard()
     }, 100)
-    
   } else if (targetRole === 'loading-board') {
-    console.log('pressed button load')
+
 
     startLoadAnimation()
 
@@ -732,7 +730,7 @@ function updateLocalStorageTasksInNativeFormat(newTasks) {
 
 async function getTasksFromApi() {
   const response = await fetch('https://json-bins.herokuapp.com/bin/614af7b24021ac0e6c080cbd')
-  console.log(response.status)
+
   if (response.ok) {
     let result = await response.json()
     return result.tasks
@@ -742,7 +740,6 @@ async function getTasksFromApi() {
 }
 
 async function putTasksToApi(tasks1 = getLocalStorageBoardTasksInNativeFormat()) {
-
   let response = await fetch('https://json-bins.herokuapp.com/bin/614af7b24021ac0e6c080cbd', {
     method: 'PUT',
     headers: {
@@ -753,7 +750,7 @@ async function putTasksToApi(tasks1 = getLocalStorageBoardTasksInNativeFormat())
   })
 
   if (response.ok) {
-    console.log(response.status)
+
     let result = await response.json()
     return result.tasks
   }
