@@ -153,8 +153,8 @@ function onEnteringSite() {
  * renderBoard - creates a new board from localStorage
  * and renders the lists.
  * optional for the future - adding renderCalender() and
- * what we want to add to the board class 
- * 
+ * what we want to add to the board class
+ *
  */
 function renderBoard() {
   board = new Board(baseTasksLists, getLocalStorageBoardTasks())
@@ -169,6 +169,13 @@ function renderLists(fatherDiv) {
     renderList(list, fatherDiv)
   }
 }
+
+/*
+ *
+ * renderList - creates each task and adn insert it into ul
+ * then renders to the listsDiv
+ *
+ */
 
 function renderList(list, fatherDiv) {
   fatherDiv.style.height = ''
@@ -195,7 +202,7 @@ function renderList(list, fatherDiv) {
       createElement('li', [task.text], ['task', 'droppable'], {
         'data-original-task-id': task.id,
         onmousedown: 'clickDrugAndDropHandler(event)', // look down in handler functions
-        ondragstart: 'onDragStart()',
+        ondragstart: 'onDragStart()', // to cancel the default browser action
       })
     )
   }
@@ -219,6 +226,10 @@ function formatListClassName(listName) {
   return formatListName(listName) + '-tasks'
 }
 
+function formatListName(name) {
+  return name.replace(/[' ']/g, '-')
+}
+
 // -------------------
 /*
  *
@@ -228,11 +239,9 @@ function formatListClassName(listName) {
  *
  */
 
-function addTask(listId, task) {
-  board.addTask(listId, task)
+function addTask(listId, taskText) {
+  board.addTask(listId, taskText)
   updateLocalStorageTasks()
-
-  const listsDiv = document.getElementById('lists-div')
 
   renderLists(listsDiv)
 }
@@ -255,10 +264,6 @@ function deleteTask(taskId) {
   renderLists(listsDiv)
 }
 
-function formatListName(name) {
-  return name.replace(/[' ']/g, '-')
-}
-
 function moveTask(taskId, newListId, newIndex = 0) {
   const task = board.getTask(taskId)
   const oldListId = board.getListIdFromTaskId(taskId)
@@ -272,6 +277,8 @@ function moveTask(taskId, newListId, newIndex = 0) {
   renderLists(listsDiv)
 }
 
+// this function is for the search input at the top of the page.
+// onkeyup="filterLists()" --> look in html
 function filterLists() {
   const allLiElements = document.querySelectorAll('.section li')
 
@@ -285,7 +292,6 @@ function filterLists() {
 }
 
 // -------------------
-
 /*
  *
  *
@@ -293,6 +299,8 @@ function filterLists() {
  *
  */
 
+// will activate when user press right click on a task
+// this will display the context menu.
 function contextClickHandler(event) {
   const prevMenu = document.querySelector('.context-menu')
   if (prevMenu) prevMenu.remove()
@@ -301,16 +309,21 @@ function contextClickHandler(event) {
 
   if (!target) return
 
-  event.preventDefault()
+  event.preventDefault() // to prevent the browser default context menu.
 
-  const menuOptionDelete = createElement('div', ['delete task'], ['delete-task-option'])
+  const menuOptionDelete = createMenuOption('delete task', removeTask)
   const contextMenu = createElement('div', [menuOptionDelete], ['context-menu'])
-
-  menuOptionDelete.addEventListener('click', removeTask)
 
   function removeTask() {
     const taskId = getLiTaskId(target)
     deleteTask(taskId)
+  }
+
+  // this function is used to create menu options. feel free to add one of your own!
+  function createMenuOption(text, handler) {
+    const menuOption = createElement('div', [`${text}`], [`${text.replace(/[' ']/g, '-')}-option`])
+    menuOption.addEventListener('click', handler)
+    return menuOption
   }
 
   contextMenu.style.position = 'absolute'
@@ -328,19 +341,22 @@ function contextClickHandler(event) {
   }
 }
 
+// this is a event delegation handler for left click events on buttons
 function clickEventHandler(event) {
   const target = event.target.closest('BUTTON')
 
   if (!target) return
 
+  // Each html button element has a dataset role.
+  // this way we determine the action to execute.
   const targetRole = target.dataset.role
 
   if (targetRole === 'adding-task') {
-    let inputValue = target.parentElement.querySelector('input').value
+    const inputValue = target.parentElement.querySelector('input').value
     if (inputValue === '') {
       alert('Cant add an empty task!')
     } else {
-      let relevantListId = getAncestorSectionListId(target)
+      const relevantListId = getAncestorSectionListId(target)
       addTask(relevantListId, inputValue)
     }
   } else if (targetRole === 'adding-list') {
@@ -355,7 +371,7 @@ function clickEventHandler(event) {
     startLoadAnimation()
     setTimeout(() => {
       renderBoard()
-    }, 100)
+    }, 1000)
     putTasksToApi().catch((error) => alert(error))
   } else if (targetRole === 'loading-board') {
     console.log('pressed button load')
@@ -374,12 +390,12 @@ function clickEventHandler(event) {
   }
 }
 
-let liMouseIsIn = null
+let mouseInTask = null // this is for monitoring if the mouse is pointing at the task
 
 function altKeyDownEventHandler(event) {
   const keyPressed = event.key
 
-  if (liMouseIsIn && keyPressed === 'Alt') {
+  if (mouseInTask && keyPressed === 'Alt') {
     document.addEventListener('keydown', numberKeyDownEventHandler)
     document.addEventListener('keyup', altKeyUpEventHandler)
   }
@@ -388,14 +404,12 @@ function altKeyDownEventHandler(event) {
 function numberKeyDownEventHandler(event) {
   const keyPressed = event.key
   const listsIdsArray = getIdsArrayFromObjArray(board.lists).map((id) => String(id))
-  if (liMouseIsIn && listsIdsArray.includes(keyPressed)) {
-    console.log(liMouseIsIn)
-    const listId = getAncestorSectionListId(liMouseIsIn)
-    const taskId = getLiTaskId(liMouseIsIn)
+  if (mouseInTask && listsIdsArray.includes(keyPressed)) {
+    const taskId = getLiTaskId(mouseInTask)
     const newListId = Number(keyPressed)
 
     moveTask(taskId, newListId)
-    liMouseIsIn = null // the task has moved so the mouse is no longer inside it.
+    mouseInTask = null // the task has moved so the mouse is no longer inside it.
   }
 }
 
@@ -407,11 +421,17 @@ function altKeyUpEventHandler(event) {
   }
 }
 
+/*
+ *
+ * here we get the task we are pointing at.
+ *
+ */
+
 function mouseOverEventHandler(event) {
   const target = event.target
 
   if (target.tagName !== 'LI') return
-  liMouseIsIn = target
+  mouseInTask = target
 }
 
 function mouseOutEventHandler(event) {
@@ -419,27 +439,17 @@ function mouseOutEventHandler(event) {
 
   if (target.tagName !== 'LI') return
 
-  liMouseIsIn = null
+  mouseInTask = null
 }
 
-function focusOutEventHandler(event) {
-  const target = event.target
+/*
+ *
+ * dbl click handlers
+ *
+ */
 
-  if (target.tagName !== 'LI') return
-
-  dblClicked = false
-
-  target.setAttribute('contenteditable', 'false')
-
-  const task = getTaskFromLi(target)
-
-  task.text = target.innerText
-
-  updateLocalStorageTasks()
-}
-
-let dblClicked = false
-let mouseDown = false
+let dblClicked = false // later used to determine if to start drag and drop
+let mouseDown = false // later used to determine if to start drag and drop
 
 function dblClickEventHandler(event) {
   const target = event.target
@@ -450,15 +460,35 @@ function dblClickEventHandler(event) {
 
   target.setAttribute('contenteditable', 'true')
   target.focus()
+
+  // a function to select all the inside off the task.
   function selectElementContents(el) {
-    var range = document.createRange()
+    const range = document.createRange()
     range.selectNodeContents(el)
-    var sel = window.getSelection()
+    const sel = window.getSelection()
     sel.removeAllRanges()
     sel.addRange(range)
   }
 
   selectElementContents(target)
+}
+
+function focusOutEventHandler(event) {
+  const target = event.target
+
+  if (target.tagName !== 'LI') return
+
+  // We will use this later when we do the drag and drop
+  // to know if to start the drag or not.
+  dblClicked = false
+
+  target.setAttribute('contenteditable', 'false')
+
+  // update the task text to mach the new one
+  const task = getTaskFromLi(target)
+  task.text = target.innerText
+
+  updateLocalStorageTasks()
 }
 
 function getAncestorSectionListId(liElement) {
@@ -475,8 +505,17 @@ function getTaskFromLi(liElement) {
   return board.getTask(taskId)
 }
 
-// -------------
+/*
+ *
+ * drag and drop handlers
+ *
+ * IMPORTANT! - these functions go on the HTML element itself
+ * in renderList() we create a tasks with an
+ * "onclick" = "clickDrugAndDropHandler(event)" attribute.
+ *
+ */
 
+// to prevent the browser default action
 function onDragStart() {
   return false
 }
@@ -484,7 +523,7 @@ function onDragStart() {
 function clickDrugAndDropHandler(event) {
   const target = event.target
 
-  event.preventDefault()
+  event.preventDefault() // to prevent the selecting action of click
 
   mouseDown = true
 
@@ -495,6 +534,11 @@ function clickDrugAndDropHandler(event) {
   }
 
   document.addEventListener('mouseup', onMouseUp)
+
+  // the main drag and drop section!
+  // we set a time out so the user can make a dblclick without starting to drag
+  // I found that the best time is 300 ms. micerosoft says its 500 ms ;)
+  const TIME_FOR_USER_TO_DBL_CLICK = 300
 
   setTimeout(() => {
     if (dblClicked === true || mouseDown === false) return
@@ -512,11 +556,11 @@ function clickDrugAndDropHandler(event) {
 
     moveAt(event.pageX, event.pageY)
 
-    // moves the ball at (pageX, pageY) coordinates
+    // moves the task at (pageX, pageY) coordinates
     // taking initial shifts into account
     function moveAt(pageX, pageY) {
       target.style.left = pageX - shiftX + 'px'
-      target.style.top = pageY - shiftY - 5 + 'px'
+      target.style.top = pageY - shiftY - 5 + 'px' // small adjustment for better performance
     }
 
     let currentDroppable = null
@@ -553,10 +597,10 @@ function clickDrugAndDropHandler(event) {
       }
     }
 
-    // move the ball on mousemove
+    // move the task on mousemove
     document.addEventListener('mousemove', onMouseMove)
 
-    // drop the ball, remove unneeded handlers
+    // drop the task, remove unneeded handlers
     target.onmouseup = function () {
       if (aboveDroppable) {
         if (currentDroppable.tagName === 'LI') {
@@ -579,7 +623,7 @@ function clickDrugAndDropHandler(event) {
       target.remove()
       renderBoard()
     }
-  }, 300)
+  }, TIME_FOR_USER_TO_DBL_CLICK)
 }
 
 let aboveDroppable = false
@@ -602,6 +646,8 @@ function leaveDroppable(droppableElement) {
 
 // -------------
 
+// adding the event listeners:
+
 document.addEventListener('keydown', altKeyDownEventHandler)
 document.addEventListener('mouseover', mouseOverEventHandler)
 document.addEventListener('mouseout', mouseOutEventHandler)
@@ -619,6 +665,7 @@ document.addEventListener('focusout', focusOutEventHandler)
  *
  *
  * local storage management functions.
+ *
  * this is an api for working with the local storage format.
  * the format:
  * {
@@ -635,6 +682,7 @@ function updateLocalStorageTasks() {
     done: [],
   }
 
+  // the format requires 'todo' and not 'to-do' so we handle this here.
   for (let list of board.lists) {
     if (list.name === 'to-do') {
       tasks['todo'] = list.tasks.map((task) => task.text)
@@ -646,10 +694,6 @@ function updateLocalStorageTasks() {
   localStorage.setItem('tasks', JSON.stringify(tasks))
 }
 
-function clearLocalStorageBoarLists() {
-  localStorage.removeItem('tasks')
-}
-
 function getLocalStorageBoardTasks() {
   let localStorageTasks = JSON.parse(localStorage.getItem('tasks'))
 
@@ -659,6 +703,7 @@ function getLocalStorageBoardTasks() {
   return localStorageTasks
 }
 
+// this functions will help us in managing the sever api.
 function getLocalStorageBoardTasksInNativeFormat() {
   return JSON.parse(localStorage.getItem('tasks'))
 }
@@ -668,11 +713,13 @@ function updateLocalStorageTasksInNativeFormat(newTasks) {
 }
 
 // -------------------
-
 /*
  *
  *
- * api methods.
+ * server api methods.
+ *
+ * here we use fetch to send requests to the server.
+ * important - if we get an error we alert the user and run the function again.
  *
  */
 
@@ -708,7 +755,40 @@ async function putTasksToApi(tasks1 = getLocalStorageBoardTasksInNativeFormat())
   await putTasksToApi()
 }
 
+/*
+ *
+ * loading animation.
+ * renders a cool animation to the listsDiv
+ *
+ */
+
+function startLoadAnimation() {
+  let height = window.getComputedStyle(listsDiv).getPropertyValue('height')
+
+  removeAllChildNodes(listsDiv)
+
+  listsDiv.style.height = height
+
+  let barDiv = document.createElement('div')
+  barDiv.classList.add('bar', 'loader')
+
+  let circleDiv = document.createElement('div')
+  circleDiv.classList.add('circle')
+
+  let p = document.createElement('p')
+  p.innerHTML = 'Loading'
+  p.classList.add('loading-p')
+
+  barDiv.append(circleDiv, p)
+  listsDiv.append(barDiv)
+}
+
 // -------------------
+/*
+ *
+ * help functions
+ *
+ */
 
 /**
  * Creates a new DOM element.
@@ -778,33 +858,6 @@ function checkIfObjectIdTaken(id, getFunction) {
 
 function deepCopyObj(obj) {
   return JSON.parse(JSON.stringify(obj))
-}
-
-/*
- *
- *loading animation
- *
- */
-
-function startLoadAnimation() {
-  let height = window.getComputedStyle(listsDiv).getPropertyValue('height')
-
-  removeAllChildNodes(listsDiv)
-
-  listsDiv.style.height = height
-
-  let barDiv = document.createElement('div')
-  barDiv.classList.add('bar', 'loader')
-
-  let circleDiv = document.createElement('div')
-  circleDiv.classList.add('circle')
-
-  let p = document.createElement('p')
-  p.innerHTML = 'Loading'
-  p.classList.add('loading-p')
-
-  barDiv.append(circleDiv, p)
-  listsDiv.append(barDiv)
 }
 
 // -------------------
