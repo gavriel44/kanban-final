@@ -1,122 +1,99 @@
-# Cyber4s 3rd Pre-Course Final Project
+# Welcome To Gavriels Kanban Board!
 
-## What we will be building
+<!-- TABLE OF CONTENTS -->
+<details open="open">
+  <summary><h2 style="display: inline-block">Table of Contents</h2></summary>
+  <ol>
+    <li>
+      <a href="#about-the-project">About The Project</a>
+      <ul>
+        <li><a href="#built-with">Built With</a></li>
+      </ul>
+    </li>
+    <li>
+      <a href="#getting-started">Getting Started</a>
+    </li>
+    <li><a href="#usage">Usage</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ol>
+</details>
 
-Welcome to your pre-course final project. You are going to build a task-management application.
+<!-- ABOUT THE PROJECT -->
 
-![Example](./example.png)
+## About The Project
 
-## Instructions
+![Live server](solution\readMeImages\front.PNG?raw=true 'Live_server')
 
-1. Fork this repo into your account.
-2. Clone the forked repo to your computer.
-3. Run the [setup](#setup) script.
-4. Create a new git branch for your work.
-5. Complete the project [requirements](#requirements).
-6. Push your work to GitHub.
-7. [Submit](#submission) your work.
+This project is a task to do list website. Here you can orginize your tasks
+and make sure you don't miss on anything important!
 
-## Setup
+Link to the github pages: [Gavriels kanban board](https://www.example.com)
 
-Execute `npm run final <your name>` (replace `<your name>` with your name). This command will install all the needed dependencies, and generate an [api-data.txt](#api-integration) file.
+### Built With
 
-## Requirements
+- html
+- javaScript
+- css
 
-### Page Structure
+pay attention - the main files for the project are located in the solution folder.
 
-There should be 3 `section` elements. One for to-do tasks, one for in-progress tasks, and one for done tasks.
+important files:
 
-Each `section` should contain:
+- index.html - The base html for the website
+- index.js - The js logic
+- styles.css - The styles
 
-- [ ] a `ul` element with the appropriate class - `to-do-tasks`/`in-progress-tasks`/`done-tasks`
-- [ ] an `input` element with an appropriate id - `add-to-do-task`/`add-in-progress-task`/`add-done-task`
-- [ ] a `button` element with an appropriate id - `submit-add-to-do`/`submit-add-in-progress`/`submit-add-done`
-- [ ] Each `ul` should contain task elements, which are `li` elements with the `task` class.
+<!-- GETTING STARTED -->
 
-In addition the page should contain:
+## Getting Started
 
-- [ ] a heading with a `page-title` id
-- [ ] a global input with the `search` id
+To get a local copy up and running follow these simple steps.
 
-### Interaction
+1. Clone the repo
+   ```sh
+   git clone https://github.com/gavriel44/kanban-final.git
+   ```
+2. Install NPM packages
+   ```sh
+   npm install
+   ```
+3. open the index.html file in the browser. I recommend using Live server for that.
 
-- [ ] When the user clicks on one of the add-task buttons, a new task will be added to the respective list. The task content will be taken from the respective input field.
-- [ ] Trying to submit empty tasks should cause an alert.
-- [ ] Double clicking a task element will enable the user to edit its text. When the task element loses focus (`blur` event) the change will be saved.
-- [ ] Hovering over a task element and pressing `alt + 1-3` will move the task to the appropriate list (`1`: todo, `2`: in-progress, `3`: done).
-- [ ] The search input should filter tasks case-**in**sensitively, so that only tasks that match the search string are displayed. The filter will be reapplied every time the user changes the content of the search input (on **every keystroke**).
+   ![Live server](solution\readMeImages\Live_server.JPG?raw=true 'Live_server')
 
-### Storage
+<!-- USAGE EXAMPLES -->
 
-- [ ] The data of all the tasks should be saved to `localStorage` following any changes made to the data. The data should be saved under a storage key named `tasks`. It should be saved in the following format (use the data saved in the local storage to keep the data on the page after refresh):
+## Usage
 
-```json
-{
-  "todo": [],
-  "in-progress": [],
-  "done": []
-}
-```
+We will give a fue examples for using the website. there are more but we wont list them all here.
 
-- [ ] Even if there are no tasks, there should still be a `tasks` key in the `localStorage`, in the above format (the arrays will just be empty).
+1. Add task:
+   enter the task text in the input off the relevant list and press the add button.
 
-## Bonuses
+   ![add task](solution\readMeImages\addTask.PNG?raw=true 'Live_server')
 
-- [ ] Implement drag-and-drop sorting of tasks.
-- [ ] Add API integration:
+2. Add a new list:
+   Enter the new list name in the input and press the add new list button.
 
-  - [ ] Add save and load buttons that sync the current tasks to the API (see details in the [api-data.txt](#api-integration) file).
-  - [ ] Remove the `.skip` from the two last tests in `main.test.js`.
-  - [ ] While waiting for a response from the API display a loader with the class `loader`.
-  - [ ] If an error occurs show an alert.
-  - [ ] If the data loaded from the API is different from the local data, replace the local data with the API data. Make sure you update both the `localStorage` and the DOM.
+   ![add new list](solution\readMeImages\addNewList.PNG?raw=true 'Live_server')
 
-- [ ] Add any additional cool features you can think of...
+3. Delete task:
+   press right click on the task and click delete task in the popup context menu.
 
-## README
+   ![delete task](solution\readMeImages\deleteTask.PNG?raw=true 'Live_server')
 
-You are expected to change the README of your project to showcase your application. Make it readable and explain what your app does. Put a screenshot and a link to GitHub pages.
+4. Use drag and drop to order the tasks as you like.
 
-## Template
+   ![drag and drop](solution\readMeImages\dragAndDrop.PNG?raw=true 'Live_server')
 
-You are provided with a template to write your code in, inside the `solution` folder. You should write your code inside `index.html`, `index.js`, `style.css`. You may create additional files for your convenience, but do not change the names of the existing ones.
+5. delete a list.
 
-## API Integration
+6. save and load tasks using save and load buttons.
 
-Once you complete the [initial setup](#setup) you will see an `api-data.txt` file that was created in the project folder. This file will contain the URLs which you can access the API with, using a unique bin ID that was generated for you.
+<!-- CONTACT -->
 
-The API is a simple remote storage that gives you a "bin" where you can store data. It allows you to save a chunk of data, or load it.
+## Contact
 
-## Testing
+Gavriel Frant - email: gavril44@gmail.com
 
-We have added some automated tests for you to use. They will help you make sure your code covers the requirements.
-
-To run the tests, execute `npm run test`.
-
-## Grading
-
-Your work will be graded based on the following considerations:
-
-- The number of tests you pass
-- Readable and ordered code
-  - Spacing & indentation
-  - Indicative vairable/function names
-  - Comments (where necessary)
-- Proper use of Git
-  - Small, standalone commits
-  - Descriptive commit messages
-  - Working in branches and creating a proper PR
-- Convenient visual design (make your app b-e-a-utiful)
-- Extra features you might have added
-
-## Submission
-
-1. On GitHub, open a pull request from your branch to the main branch.
-2. **Do not merge the pull request!**
-3. Add the user `Cyber4sPopo` as collaborator to your repo.
-4. Deploy your application to GitHub pages.
-5. Submit in Google Classroom:
-   - a link to the pull request
-   - a link to your site on GitHub pages
-   - a 5 minutes min selfie video, where you talk about yourself in a few words (age, location, military background, technological background). Think about this video as a part of your interview.
-   - another 2-5 minute video where you talk about your submission solution, showing how your app works and any special features you added.
+Project Link: [https://github.com/github_username/repo_name](https://github.com/github_username/repo_name)
