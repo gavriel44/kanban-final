@@ -45,9 +45,14 @@ important files:
 
 ### Flowchart Diagram
 
-This diagram explains the rendering and butting of the program.
+The mane idea behinds my project is the Board class. Every time we update anything on the board we change the board object accordingly and save the current board in the local storage. 
+The rendering then happens when we take the data from the board object and render it.
+If we refresh the page, we take the localStorage data and create a new instance of the board. this is our board new. we new render it.
+that way we can have eny board and be able to render it easily.
 
-![add task](solution/readMeImages/diagram2.PNG?raw=true 'diagram')
+the diagram below will help to understand the concept.
+
+![add task](solution/readMeImages/diagram3.PNG?raw=true 'diagram')
 
 <!-- GETTING STARTED -->
 
