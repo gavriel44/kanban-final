@@ -382,7 +382,7 @@ function clickEventHandler(event) {
     startLoadAnimation()
     setTimeout(() => {
       renderBoard()
-    }, 1000)
+    }, 100)
     putTasksToApi().catch((error) => alert(error))
   } else if (targetRole === 'loading-board') {
     console.log('pressed button load')
