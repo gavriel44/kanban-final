@@ -55,7 +55,8 @@ class Board {
 
   addTask(listId, taskText) {
     const listTasks = this.getList(listId).tasks
-    listTasks.push({ text: taskText, id: this.generateUniqueTaskId(listTasks) })
+    const task = validateTask({ text: taskText, id: this.generateUniqueTaskId(listTasks) })
+    listTasks.push(task)
   }
 
   getList(listId) {
@@ -868,6 +869,22 @@ function checkIfObjectIdTaken(id, getFunction) {
 
 function deepCopyObj(obj) {
   return JSON.parse(JSON.stringify(obj))
+}
+
+/* 
+*
+* validation functions 
+*
+*/
+
+function validateTask(task) {
+  console.log(task.text.length);
+  console.log(typeof task);
+  if (typeof task === 'object' && task.text.length) {
+    return task
+  }
+
+  throw Error('Invalid task')
 }
 
 // -------------------
