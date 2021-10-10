@@ -840,10 +840,11 @@ function generateNewIdInArrayOfObjects(objectArr) {
   return Math.max(...idArray) + 1
 }
 
+
 function getObjectFromArray(objectId, objectArr) {
   // throws Error if Object does not exists.
   const requestedObject = objectArr.find((obj) => obj.id === objectId)
-  if (requestedObject === undefined) throw new Error('so such object exists')
+  if (requestedObject === undefined) throw new Error('no such object exists')
   return requestedObject
 }
 
