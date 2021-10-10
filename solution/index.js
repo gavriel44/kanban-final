@@ -139,10 +139,14 @@ let board
 
 function onEnteringSite() {
   if (!localStorage.getItem('tasks')) {
-    localStorage.setItem('tasks', JSON.stringify({ todo: [], 'in-progress': [], done: [] }))
+    setDefaultLocalStorageTasks()
   }
 
   renderBoard()
+}
+
+function setDefaultLocalStorageTasks() {
+  localStorage.setItem('tasks', JSON.stringify({ todo: [], 'in-progress': [], done: [] }))
 }
 
 // -------------------
@@ -200,8 +204,18 @@ function renderList(list, fatherDiv) {
 
   const inputDiv = createElement('div', [input, addButton], ['input-div'])
 
-  const tasks = []
+  const tasks = createTasksFromList(list)
 
+  const tasksList = createElement('ul', tasks, [list.styleClass, 'task-list'])
+  const section = createElement('section', [deleteButton, listHeader, tasksList, inputDiv], ['section', 'droppable'], {
+    'data-original-list-id': list.id,
+  })
+
+  fatherDiv.append(section)
+}
+
+function createTasksFromList(list) {
+  const tasks = []
   for (let task of list.tasks) {
     tasks.push(
       createElement('li', [task.text], ['task', 'droppable'], {
@@ -211,13 +225,7 @@ function renderList(list, fatherDiv) {
       })
     )
   }
-
-  const tasksList = createElement('ul', tasks, [list.styleClass, 'task-list'])
-  const section = createElement('section', [deleteButton, listHeader, tasksList, inputDiv], ['section', 'droppable'], {
-    'data-original-list-id': list.id,
-  })
-
-  fatherDiv.append(section)
+  return tasks
 }
 
 function formatName(listName) {
