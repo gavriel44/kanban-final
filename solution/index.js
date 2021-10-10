@@ -333,11 +333,6 @@ function contextClickHandler(event) {
   }
 
   // this function is used to create menu options. feel free to add one of your own!
-  function createMenuOption(text, handler) {
-    const menuOption = createElement('div', [`${text}`], [`${text.replace(/[' ']/g, '-')}-option`])
-    menuOption.addEventListener('click', handler)
-    return menuOption
-  }
 
   contextMenu.style.position = 'absolute'
   contextMenu.style.zIndex = 1000
@@ -352,6 +347,12 @@ function contextClickHandler(event) {
     contextMenu.remove()
     document.removeEventListener('onclick', exitContextMenuHandler)
   }
+}
+
+function createMenuOption(text, handler) {
+  const menuOption = createElement('div', [`${text}`], [`${text.replace(/[' ']/g, '-')}-option`])
+  menuOption.addEventListener('click', handler)
+  return menuOption
 }
 
 // this is a event delegation handler for left click events on buttons
@@ -380,22 +381,18 @@ function clickEventHandler(event) {
       addNewList(inputValue)
     }
   } else if (targetRole === 'saving-board') {
-    putTasksToApi().catch((error) => alert(error))
+    putTasksToApi(getLocalStorageBoardTasksInNativeFormat())
     startLoadAnimation()
     setTimeout(() => {
       renderBoard()
     }, 100)
   } else if (targetRole === 'loading-board') {
-
-
     startLoadAnimation()
 
-    getTasksFromApi()
-      .then((tasks) => {
-        updateLocalStorageTasksInNativeFormat(tasks)
-        renderBoard()
-      })
-      .catch((error) => alert(error))
+    getTasksFromApi().then((tasks) => {
+      updateLocalStorageTasksInNativeFormat(tasks)
+      renderBoard()
+    })
   } else if (targetRole === 'delete-list') {
     let relevantListId = getAncestorSectionListId(target)
     deleteList(relevantListId)
@@ -540,13 +537,13 @@ function clickDrugAndDropHandler(event) {
 
   mouseDown = true
 
+  document.addEventListener('mouseup', onMouseUp)
+
   function onMouseUp(event) {
     if (event.target === target) {
       mouseDown = false
     }
   }
-
-  document.addEventListener('mouseup', onMouseUp)
 
   // the main drag and drop section!
   // we set a time out so the user can make a dblclick without starting to drag
@@ -661,16 +658,16 @@ function leaveDroppable(droppableElement) {
 
 // adding the event listeners:
 
-document.addEventListener('keydown', altKeyDownEventHandler)
-document.addEventListener('mouseover', mouseOverEventHandler)
-document.addEventListener('mouseout', mouseOutEventHandler)
+LISTS_DIV.addEventListener('keydown', altKeyDownEventHandler)
+LISTS_DIV.addEventListener('mouseover', mouseOverEventHandler)
+LISTS_DIV.addEventListener('mouseout', mouseOutEventHandler)
 
 document.addEventListener('click', clickEventHandler)
-document.addEventListener('contextmenu', contextClickHandler)
+LISTS_DIV.addEventListener('contextmenu', contextClickHandler)
 
-document.addEventListener('dblclick', dblClickEventHandler)
+LISTS_DIV.addEventListener('dblclick', dblClickEventHandler)
 
-document.addEventListener('focusout', focusOutEventHandler)
+LISTS_DIV.addEventListener('focusout', focusOutEventHandler)
 
 // -------------------
 
@@ -708,7 +705,7 @@ function updateLocalStorageTasks() {
 }
 
 function getLocalStorageBoardTasks() {
-  let localStorageTasks = JSON.parse(localStorage.getItem('tasks'))
+  const localStorageTasks = getLocalStorageBoardTasksInNativeFormat()
 
   // we replace the property key: 'todo' with the key 'to-do',
   // so our Board class can handle it properly.
@@ -736,34 +733,36 @@ function updateLocalStorageTasksInNativeFormat(newTasks) {
  *
  */
 
-async function getTasksFromApi() {
-  const response = await fetch('https://json-bins.herokuapp.com/bin/614af7b24021ac0e6c080cbd')
+const TASKS_API_URL = 'https://json-bins.herokuapp.com/bin/614af7b24021ac0e6c080cbd'
 
-  if (response.ok) {
-    let result = await response.json()
-    return result.tasks
-  }
-  alert('server error - trying again')
-  await getTasksFromApi()
-}
-
-async function putTasksToApi(tasks1 = getLocalStorageBoardTasksInNativeFormat()) {
-  let response = await fetch('https://json-bins.herokuapp.com/bin/614af7b24021ac0e6c080cbd', {
-    method: 'PUT',
+async function request(method = '', data = null) {
+  const options = {
+    method: method,
     headers: {
       Accept: 'application/json',
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ tasks: tasks1 }),
-  })
-
-  if (response.ok) {
-
-    let result = await response.json()
-    return result.tasks
   }
-  alert('server error - trying again')
-  await putTasksToApi()
+
+  if (data) {
+    options['body'] = JSON.stringify(data)
+  }
+
+  try {
+    return await fetch(TASKS_API_URL, options).then((response) => response.json())
+  } catch {
+    alert('server error - trying again')
+    request(method, data)
+  }
+}
+
+async function getTasksFromApi() {
+  const loaded = await request('GET')
+  return loaded.tasks
+}
+
+async function putTasksToApi(tasks) {
+  await request('PUT', { tasks })
 }
 
 /*
