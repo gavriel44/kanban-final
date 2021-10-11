@@ -1,5 +1,11 @@
-'use strict'
-
+/* eslint-disable no-prototype-builtins */
+/* eslint-disable consistent-return */
+/* eslint-disable no-shadow */
+/* eslint-disable prettier/prettier */
+/* eslint-disable no-unused-vars */
+/* eslint-disable no-param-reassign */
+/* eslint-disable no-use-before-define */
+/* eslint-disable no-restricted-syntax */
 /*
  * The mane Board class.
  *
@@ -37,11 +43,11 @@ class Board {
     */
     this.BASE_TASKS_LISTS = BASE_TASKS_LISTS
     this.lists = []
-    for (let listName of this.BASE_TASKS_LISTS) {
+    for (const listName of this.BASE_TASKS_LISTS) {
       this.addNewList(listName, [], formatListClassName(listName))
     }
 
-    for (let newTaskListName in tasks) {
+    for (const newTaskListName in tasks) {
       if (this.BASE_TASKS_LISTS.includes(newTaskListName)) {
         const alreadyExistsList = this.getListByName(newTaskListName)
         tasks[newTaskListName].forEach((taskText) => this.addTask(alreadyExistsList.id, taskText))
@@ -76,9 +82,9 @@ class Board {
   }
 
   generateUniqueTaskId() {
-    let allTasks = []
+    const allTasks = []
 
-    for (let list of this.lists) {
+    for (const list of this.lists) {
       allTasks.push(...list.tasks)
     }
     return generateNewIdInArrayOfObjects(allTasks)
@@ -87,7 +93,7 @@ class Board {
   getTask(taskId) {
     const allTasks = []
 
-    for (let list of this.lists) {
+    for (const list of this.lists) {
       allTasks.push(...list.tasks)
     }
 
@@ -95,8 +101,8 @@ class Board {
   }
 
   getListIdFromTaskId(taskId) {
-    for (let list of this.lists) {
-      for (let task of list.tasks) {
+    for (const list of this.lists) {
+      for (const task of list.tasks) {
         if (task.id === taskId) return list.id
       }
     }
@@ -175,7 +181,7 @@ function renderBoard() {
 function renderLists(fatherDiv) {
   removeAllChildNodes(LISTS_DIV)
 
-  for (let list of board.lists) {
+  for (const list of board.lists) {
     renderList(list, fatherDiv)
   }
 }
@@ -217,7 +223,7 @@ function renderList(list, fatherDiv) {
 
 function createTasksFromList(list) {
   const tasks = []
-  for (let task of list.tasks) {
+  for (const task of list.tasks) {
     tasks.push(
       createElement('li', [task.text], ['task', 'droppable'], {
         'data-original-task-id': task.id,
@@ -237,7 +243,7 @@ function formatName(listName) {
 }
 
 function formatListClassName(listName) {
-  return formatListName(listName) + '-tasks'
+  return `${formatListName(listName)}-tasks`
 }
 
 function formatListName(name) {
@@ -306,9 +312,10 @@ function filterLists() {
 
   const valueInput = document.querySelector('#search').value.toLowerCase().trim()
 
-  for (let liElement of allLiElements) {
+  for (const liElement of allLiElements) {
     const liValue = liElement.innerText.toLowerCase().trim()
 
+    // eslint-disable-next-line eqeqeq
     liElement.style.display = liValue.search(new RegExp(valueInput.replace(/\s+/, '|'))) != -1 ? '' : 'none'
   }
 }
@@ -339,12 +346,12 @@ function contextClickHandler(event) {
   contextMenu.style.zIndex = 1000
   document.body.append(contextMenu)
 
-  contextMenu.style.left = event.pageX + 'px'
-  contextMenu.style.top = event.pageY + 'px'
+  contextMenu.style.left = `${event.pageX}px`
+  contextMenu.style.top = `${event.pageY}px`
 
   document.addEventListener('click', exitContextMenuHandler)
 
-  function exitContextMenuHandler(event) {
+  function exitContextMenuHandler() {
     contextMenu.remove()
     document.removeEventListener('onclick', exitContextMenuHandler)
   }
@@ -395,7 +402,7 @@ function clickEventHandler(event) {
       renderBoard()
     })
   } else if (targetRole === 'delete-list') {
-    let relevantListId = getAncestorSectionListId(target)
+    const relevantListId = getAncestorSectionListId(target)
     deleteList(relevantListId)
   }
 }
@@ -438,14 +445,14 @@ function altKeyUpEventHandler(event) {
  */
 
 function mouseOverEventHandler(event) {
-  const target = event.target
+  const { target } = event
 
   if (target.tagName !== 'LI') return
   mouseInTask = target
 }
 
 function mouseOutEventHandler(event) {
-  const target = event.target
+  const { target } = event
 
   if (target.tagName !== 'LI') return
 
@@ -462,7 +469,7 @@ let dblClicked = false // later used to determine if to start drag and drop
 let mouseDown = false // later used to determine if to start drag and drop
 
 function dblClickEventHandler(event) {
-  const target = event.target
+  const { target } = event
 
   if (target.tagName !== 'LI') return
 
@@ -484,7 +491,7 @@ function dblClickEventHandler(event) {
 }
 
 function focusOutEventHandler(event) {
-  const target = event.target
+  const { target } = event
 
   if (target.tagName !== 'LI') return
 
@@ -532,7 +539,7 @@ function onDragStart() {
 }
 
 function clickDrugAndDropHandler(event) {
-  const target = event.target
+  const { target } = event
 
   event.preventDefault() // to prevent the selecting action of click
 
@@ -540,6 +547,7 @@ function clickDrugAndDropHandler(event) {
 
   document.addEventListener('mouseup', onMouseUp)
 
+  // eslint-disable-next-line no-shadow
   function onMouseUp(event) {
     if (event.target === target) {
       mouseDown = false
@@ -558,8 +566,8 @@ function clickDrugAndDropHandler(event) {
 
     target.classList.add('moving-task')
 
-    let shiftX = event.clientX - target.getBoundingClientRect().left
-    let shiftY = event.clientY - target.getBoundingClientRect().top
+    const shiftX = event.clientX - target.getBoundingClientRect().left
+    const shiftY = event.clientY - target.getBoundingClientRect().top
 
     target.style.position = 'absolute'
     target.style.zIndex = 1000
@@ -570,8 +578,8 @@ function clickDrugAndDropHandler(event) {
     // moves the task at (pageX, pageY) coordinates
     // taking initial shifts into account
     function moveAt(pageX, pageY) {
-      target.style.left = pageX - shiftX + 'px'
-      target.style.top = pageY - shiftY - 5 + 'px' // small adjustment for better performance
+      target.style.left = `${pageX - shiftX}px`
+      target.style.top = `${pageY - shiftY - 5}px` // small adjustment for better performance
     }
 
     let currentDroppable = null
@@ -580,7 +588,7 @@ function clickDrugAndDropHandler(event) {
       moveAt(event.pageX, event.pageY)
 
       target.style.display = 'none'
-      let elemBelow = document.elementFromPoint(event.clientX, event.clientY)
+      const elemBelow = document.elementFromPoint(event.clientX, event.clientY)
       target.style.display = ''
 
       // mousemove events may trigger out of the window (when the ball is dragged off-screen)
@@ -588,8 +596,9 @@ function clickDrugAndDropHandler(event) {
       if (!elemBelow) return
 
       // potential droppable are labeled with the class "droppable" (can be other logic)
-      let droppableBelow = elemBelow.closest('.droppable')
+      const droppableBelow = elemBelow.closest('.droppable')
 
+      // eslint-disable-next-line eqeqeq
       if (currentDroppable != droppableBelow) {
         // we're flying in or out...
         // note: both values can be null
@@ -694,9 +703,9 @@ function updateLocalStorageTasks() {
   }
 
   // the format requires 'todo' and not 'to-do' so we handle this here.
-  for (let list of board.lists) {
+  for (const list of board.lists) {
     if (list.name === 'to-do') {
-      tasks['todo'] = list.tasks.map((task) => task.text)
+      tasks.todo = list.tasks.map((task) => task.text)
     } else {
       tasks[list.name] = list.tasks.map((task) => task.text)
     }
@@ -710,7 +719,7 @@ function getLocalStorageBoardTasks() {
 
   // we replace the property key: 'todo' with the key 'to-do',
   // so our Board class can handle it properly.
-  delete Object.assign(localStorageTasks, { ['to-do']: localStorageTasks['todo'] })['todo']
+  delete Object.assign(localStorageTasks, { 'to-do': localStorageTasks.todo }).todo
   return localStorageTasks
 }
 
@@ -738,7 +747,7 @@ const TASKS_API_URL = 'https://json-bins.herokuapp.com/bin/614af7b24021ac0e6c080
 
 async function request(method = '', data = null) {
   const options = {
-    method: method,
+    method,
     headers: {
       Accept: 'application/json',
       'Content-Type': 'application/json',
@@ -746,7 +755,7 @@ async function request(method = '', data = null) {
   }
 
   if (data) {
-    options['body'] = JSON.stringify(data)
+    options.body = JSON.stringify(data)
   }
 
   try {
@@ -774,19 +783,19 @@ async function putTasksToApi(tasks) {
  */
 
 function startLoadAnimation() {
-  let height = window.getComputedStyle(LISTS_DIV).getPropertyValue('height')
+  const height = window.getComputedStyle(LISTS_DIV).getPropertyValue('height')
 
   removeAllChildNodes(LISTS_DIV)
 
   LISTS_DIV.style.height = height
 
-  let barDiv = document.createElement('div')
+  const barDiv = document.createElement('div')
   barDiv.classList.add('bar', 'loader')
 
-  let circleDiv = document.createElement('div')
+  const circleDiv = document.createElement('div')
   circleDiv.classList.add('circle')
 
-  let p = document.createElement('p')
+  const p = document.createElement('p')
   p.innerHTML = 'Loading'
   p.classList.add('loading-p')
 
@@ -817,8 +826,11 @@ function createElement(tagName, children = [], classes = [], attributes = {}) {
   const mainElement = document.createElement(tagName)
   children.forEach((childElement) => mainElement.append(childElement))
   mainElement.classList.add(...classes)
-  for (let attribute in attributes) {
-    mainElement.setAttribute(attribute, attributes[attribute])
+
+  for (const attribute in attributes) {
+    if (attributes.hasOwnProperty(attribute)) {
+      mainElement.setAttribute(attribute, attributes[attribute])
+    }
   }
   return mainElement
 }
@@ -839,7 +851,6 @@ function generateNewIdInArrayOfObjects(objectArr) {
   const idArray = getIdsArrayFromObjArray(objectArr)
   return Math.max(...idArray) + 1
 }
-
 
 function getObjectFromArray(objectId, objectArr) {
   // throws Error if Object does not exists.
@@ -872,15 +883,13 @@ function deepCopyObj(obj) {
   return JSON.parse(JSON.stringify(obj))
 }
 
-/* 
-*
-* validation functions 
-*
-*/
+/*
+ *
+ * validation functions
+ *
+ */
 
 function validateTask(task) {
-  console.log(task.text.length);
-  console.log(typeof task);
   if (typeof task === 'object' && task.text.length) {
     return task
   }
