@@ -1,4 +1,4 @@
-/* eslint-disable prettier/prettier */
+import './styles.css'
 /* eslint-disable no-alert */
 /* eslint-disable no-prototype-builtins */
 /* eslint-disable consistent-return */
