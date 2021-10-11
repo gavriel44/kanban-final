@@ -1,7 +1,8 @@
+/* eslint-disable prettier/prettier */
+/* eslint-disable no-alert */
 /* eslint-disable no-prototype-builtins */
 /* eslint-disable consistent-return */
 /* eslint-disable no-shadow */
-/* eslint-disable prettier/prettier */
 /* eslint-disable no-unused-vars */
 /* eslint-disable no-param-reassign */
 /* eslint-disable no-use-before-define */
@@ -621,7 +622,7 @@ function clickDrugAndDropHandler(event) {
     document.addEventListener('mousemove', onMouseMove)
 
     // drop the task, remove unneeded handlers
-    target.onmouseup = function () {
+    target.onmouseup = function bar() {
       if (aboveDroppable) {
         if (currentDroppable.tagName === 'LI') {
           const newListId = getAncestorSectionListId(currentDroppable)
