@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="./styles.css" />
+    <title>Gavriels kanban</title>
+  <script defer src="main.fda5beabf10f6bbd68c2.js"></script></head>
+  <body>
+    <header>
+      <h1 id="page-title">Welcome to Gavriels kanban board!</h1>
+      <input type="text" name="global-search" id="search" placeholder="search..." onkeyup="filterLists()" />
+    </header>
+    <div id="board-div">
+      <!-- here we enter all the dynamic content of the board object e.g the sections.. -->
+      <div class="lists-div" id="lists-div"><p></p></div>
+
+      <div id="action-div" class="lists-div"> 
+        <div id="api-actions">
+          <button id="save-btn" data-role="saving-board" class="action-button"><span class="action-span">Save</span></button>
+          <button id="load-btn" data-role="loading-board" class="action-button"><span class="action-span">Load</span></button>
+        </div>
+        <div id="add-list-div">
+          <input type="text" id="add-new-list" class="add-input" placeholder="List name">
+          <button class="add-list" data-role="adding-list">Add new list</button>
+        </div>
+      </div>
+
+      
+    </div>
+
+    <script src="./index.js"></script>
+  </body>
+</html>
