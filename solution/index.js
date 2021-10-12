@@ -43,7 +43,6 @@ function onEnteringSite() {
   const board = new Board(BASE_TASKS_LISTS, getLocalStorageBoardTasks())
   board.LISTS_DIV = LISTS_DIV // TODO: should be in the constructor
   window.board = board
-  console.log('test: ', board)
 
   renderBoard(LISTS_DIV, board)
 }
